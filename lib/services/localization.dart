@@ -54,6 +54,7 @@ class LocalizationService {
     'archive': '보관함',
     'copied_toast': '클립보드에 복사되었습니다!',
     'empty_list': '클립보드가 비어 있습니다.\nPC나 폰에서 내용을 복사해보세요!',
+    'empty_list_archive': '보관함이 비어 있습니다.',
 
     // Settings / Dialogs
     'timer_title': '자동 삭제 타이머 ⏱️',
@@ -97,6 +98,7 @@ class LocalizationService {
     'archive': 'Archive',
     'copied_toast': 'Copied to clipboard!',
     'empty_list': 'Clipboard is empty.\nCopy something on your PC or Phone!',
+    'empty_list_archive': 'Archive is empty.',
 
     // Settings / Dialogs
     'timer_title': 'Auto-Delete Timer ⏱️',

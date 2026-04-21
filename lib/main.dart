@@ -794,7 +794,7 @@ class _ClipboardHomeState extends State<ClipboardHome> with WidgetsBindingObserv
           
           if (items.isEmpty) {
             return Center(
-              child: Text(LocalizationService.get('empty_list'), 
+              child: Text(_isArchiveTab ? LocalizationService.get('empty_list_archive') : LocalizationService.get('empty_list'), 
                 textAlign: TextAlign.center,
                 style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 16),
               ),
