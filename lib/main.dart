@@ -186,14 +186,14 @@ void main() async {
         center: true,
         skipTaskbar: true,
         titleBarStyle: TitleBarStyle.normal,
-        title: 'Antigravity Clipboard',
+        title: 'BridgeClip',
       );
       windowManager.waitUntilReadyToShow(windowOptions, () async {
         await windowManager.hide();
       });
 
       launchAtStartup.setup(
-        appName: 'Antigravity Clipboard Sync',
+        appName: 'BridgeClip',
         appPath: Platform.resolvedExecutable,
       );
       await launchAtStartup.enable();
@@ -201,7 +201,7 @@ void main() async {
       await trayManager.setIcon(Platform.isWindows ? 'assets/app_icon.ico' : 'assets/app_icon.png');
       List<MenuItem> items = [
         MenuItem(key: 'show_window', label: '설정 화면 열기'),
-        MenuItem(key: 'auto_start', label: '시작프로그램 등록완료 (Antigravity Clipboard)'),
+        MenuItem(key: 'auto_start', label: '시작프로그램 등록완료 (BridgeClip)'),
         MenuItem.separator(),
         MenuItem(key: 'exit_app', label: '완전 종료'),
       ];
@@ -220,7 +220,7 @@ class ClipboardSyncApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Antigravity Clipboard',
+      title: 'BridgeClip',
       theme: ThemeData(
         brightness: Brightness.dark,
         scaffoldBackgroundColor: const Color(0xFF121212),
