@@ -1,0 +1,187 @@
+import 'dart:async';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:flutter/services.dart' show rootBundle;
+import 'package:googleapis_auth/auth_io.dart';
+import '../models/clipboard_item.dart';
+import 'crypto_service.dart';
+
+class DatabaseService {
+  final String roomId;
+  final String _projectId = 'shrud-clip-2026-78fee';
+  late final String _collectionPath;
+  final String _apiKey = 'AIzaSyBmX9bvfS6B8tDeu24bW77nREiAdu7SBoU';
+
+  DatabaseService({required this.roomId}) {
+    _collectionPath = 'users/$roomId/clipboards';
+  }
+
+  String get _baseUrl => 'https://firestore.googleapis.com/v1/projects/$_projectId/databases/(default)/documents/$_collectionPath';
+
+  Future<void> addClipboardItem(String content, String deviceName, String platform) async {
+    if (content.isEmpty) return;
+
+    final encryptedContent = await CryptoService.instance.encrypt(content);
+    
+    final body = jsonEncode({
+      'fields': {
+        'content': {'stringValue': encryptedContent},
+        'timestamp': {'timestampValue': DateTime.now().toUtc().toIso8601String()},
+        'deviceName': {'stringValue': deviceName},
+        'platform': {'stringValue': platform},
+        'isPinned': {'booleanValue': false},
+      }
+    });
+
+    try {
+      print("Firebase 업로드 시도 중...");
+      final res = await http.post(Uri.parse('$_baseUrl?key=$_apiKey'), body: body);
+      if (res.statusCode == 200 || res.statusCode == 201) {
+        print("✅ Firebase 업로드 성공!");
+        _sendFcmPush(encryptedContent, deviceName);
+      } else {
+        print("❌ Firebase 업로드 실패! 상태 코드: ${res.statusCode}");
+        print("응답 내용: ${res.body}");
+      }
+    } catch (e) {
+      print("❌ Firebase 네트워크 에러: $e");
+    }
+  }
+
+  Future<void> togglePin(String id, bool currentState) async {
+    try {
+      final url = '$_baseUrl/$id?updateMask.fieldPaths=isPinned&key=$_apiKey';
+      final body = jsonEncode({
+        "fields": {
+          "isPinned": {"booleanValue": !currentState}
+        }
+      });
+      await http.patch(Uri.parse(url), body: body);
+    } catch (e) {}
+  }
+
+  Future<void> saveFcmToken(String deviceName, String token) async {
+    final tokenPath = 'users/$roomId/tokens/$deviceName';
+    final url = 'https://firestore.googleapis.com/v1/projects/$_projectId/databases/(default)/documents/$tokenPath?key=$_apiKey';
+    final body = jsonEncode({
+      'fields': {
+        'token': {'stringValue': token},
+      }
+    });
+    
+    // Using dummy query to force complete overwrite of fields
+    try {
+      await http.patch(Uri.parse(url), body: body);
+    } catch (e) {}
+  }
+
+  Future<String?> _getAccessToken() async {
+    try {
+      final keyJson = await rootBundle.loadString('service-account.json');
+      final credentials = ServiceAccountCredentials.fromJson(jsonDecode(keyJson));
+      final scopes = ['https://www.googleapis.com/auth/firebase.messaging'];
+      final client = await clientViaServiceAccount(credentials, scopes);
+      final token = client.credentials.accessToken.data;
+      client.close();
+      return token;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  Future<void> _sendFcmPush(String content, String uploaderDevice) async {
+    try {
+      final tokensUrl = 'https://firestore.googleapis.com/v1/projects/$_projectId/databases/(default)/documents/users/$roomId/tokens?key=$_apiKey';
+      final res = await http.get(Uri.parse(tokensUrl));
+      List<String> targetTokens = [];
+      if (res.statusCode == 200) {
+        final data = jsonDecode(res.body);
+        final docs = data['documents'] as List<dynamic>? ?? [];
+        for (var doc in docs) {
+          final id = (doc['name'] as String).split('/').last;
+          if (id != uploaderDevice) {
+            final token = doc['fields']?['token']?['stringValue'];
+            if (token != null) targetTokens.add(token);
+          }
+        }
+      }
+
+      if (targetTokens.isEmpty) return;
+
+      final accessToken = await _getAccessToken();
+      if (accessToken == null) return;
+
+      final fcmUrl = 'https://fcm.googleapis.com/v1/projects/$_projectId/messages:send';
+      for (String target in targetTokens) {
+        final body = jsonEncode({
+          "message": {
+            "token": target,
+            "data": {
+              "title": "클립보드 동기화 완료",
+              "body": "$uploaderDevice 기기에서 데이터가 전송되었습니다.",
+              "action": "open_clipboard",
+              "text": content
+            }
+          }
+        });
+        await http.post(
+          Uri.parse(fcmUrl),
+          headers: {
+            'Authorization': 'Bearer $accessToken',
+            'Content-Type': 'application/json',
+          },
+          body: body,
+        );
+      }
+    } catch (e) {
+      // Ignored
+    }
+  }
+
+  Stream<List<ClipboardItem>> get clipboardStream async* {
+    bool hasYielded = false;
+    while (true) {
+      try {
+        final uri = Uri.parse('$_baseUrl?key=$_apiKey');
+        final response = await http.get(uri);
+        if (response.statusCode == 200) {
+          final data = jsonDecode(response.body);
+          final docs = data['documents'] as List<dynamic>? ?? [];
+          List<ClipboardItem> items = [];
+          
+          for (var doc in docs) {
+            final fields = doc['fields'];
+            final rawContent = fields['content']?['stringValue'] ?? '';
+            final decryptedContent = await CryptoService.instance.decrypt(rawContent);
+
+            items.add(ClipboardItem(
+              id: (doc['name'] as String).split('/').last,
+              content: decryptedContent,
+              timestamp: DateTime.parse(fields['timestamp']?['timestampValue'] ?? DateTime.now().toIso8601String()),
+              deviceName: fields['deviceName']?['stringValue'] ?? 'Unknown',
+              platform: fields['platform']?['stringValue'] ?? 'unknown',
+              isPinned: fields['isPinned']?['booleanValue'] ?? false,
+            ));
+          }
+          
+          items.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+          yield items;
+          hasYielded = true;
+        } else {
+          print('HTTP Error: ${response.statusCode} / ${response.body}');
+          if (!hasYielded) yield <ClipboardItem>[];
+        }
+      } catch (e) {
+         if (!hasYielded) yield <ClipboardItem>[];
+      }
+      await Future.delayed(const Duration(milliseconds: 2500));
+    }
+  }
+
+  Future<void> deleteItem(String id) async {
+    try {
+      await http.delete(Uri.parse('$_baseUrl/$id?key=$_apiKey'));
+    } catch (e) {}
+  }
+}
+
