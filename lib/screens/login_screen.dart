@@ -63,8 +63,11 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF121212),
+    return ValueListenableBuilder<AppLang>(
+      valueListenable: LocalizationService.currentLang,
+      builder: (context, lang, child) {
+        return Scaffold(
+          backgroundColor: const Color(0xFF121212),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -254,7 +257,8 @@ class _LoginScreenState extends State<LoginScreen> {
             ],
           ),
         ),
-      ),
+      );
+      }
     );
   }
 }

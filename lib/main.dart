@@ -657,13 +657,33 @@ class _ClipboardHomeState extends State<ClipboardHome> with WidgetsBindingObserv
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(_isArchiveTab ? LocalizationService.get('archive') : LocalizationService.get('clipboard'), style: const TextStyle(fontWeight: FontWeight.bold)),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        centerTitle: true,
-        actions: [
+    return ValueListenableBuilder<AppLang>(
+      valueListenable: LocalizationService.currentLang,
+      builder: (context, lang, child) {
+        return Scaffold(
+          appBar: AppBar(
+            title: Text(_isArchiveTab ? LocalizationService.get('archive') : LocalizationService.get('clipboard'), style: const TextStyle(fontWeight: FontWeight.bold)),
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            centerTitle: true,
+            actions: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton<AppLang>(
+                    value: lang,
+                    dropdownColor: const Color(0xFF1E1E1E),
+                    icon: const Icon(Icons.language, color: Colors.blueAccent),
+                    items: const [
+                      DropdownMenuItem(value: AppLang.ko, child: Text('한국어', style: TextStyle(color: Colors.white))),
+                      DropdownMenuItem(value: AppLang.en, child: Text('English', style: TextStyle(color: Colors.white))),
+                    ],
+                    onChanged: (val) {
+                      if (val != null) LocalizationService.setLanguage(val);
+                    },
+                  ),
+                ),
+              ),
           IconButton(
             icon: Icon(_isNotificationEnabled ? Icons.notifications_active : Icons.notifications_off, color: _isNotificationEnabled ? Colors.blueAccent : Colors.white54),
             onPressed: _toggleNotification,
@@ -897,6 +917,8 @@ class _ClipboardHomeState extends State<ClipboardHome> with WidgetsBindingObserv
           );
         }
       ),
+    );
+        }
     );
   }
 }
