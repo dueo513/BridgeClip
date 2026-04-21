@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/crypto_service.dart';
 import '../main.dart'; // To navigate to ClipboardHome
+import '../services/localization.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -21,8 +22,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
     if (roomId.isEmpty || roomPassword.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('접속할 룸 코드와 비밀번호를 모두 입력해주세요.', style: TextStyle(color: Colors.white)),
+        SnackBar(
+          content: Text(LocalizationService.get('login_err_empty'), style: const TextStyle(color: Colors.white)),
           backgroundColor: Colors.redAccent,
         ),
       );
@@ -36,7 +37,7 @@ class _LoginScreenState extends State<LoginScreen> {
     } catch (e) {
       setState(() => _isLoading = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('암호화 키 생성에 실패했습니다.')),
+        SnackBar(content: Text(LocalizationService.get('login_err_key'))),
       );
       return;
     }
@@ -64,6 +65,31 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF121212),
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        actions: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<AppLang>(
+                value: LocalizationService.currentLang.value,
+                dropdownColor: const Color(0xFF1E1E1E),
+                icon: const Icon(Icons.language, color: Colors.blueAccent),
+                items: const [
+                  DropdownMenuItem(value: AppLang.ko, child: Text('한국어', style: TextStyle(color: Colors.white))),
+                  DropdownMenuItem(value: AppLang.en, child: Text('English', style: TextStyle(color: Colors.white))),
+                ],
+                onChanged: (val) {
+                  if (val != null) {
+                    LocalizationService.setLanguage(val);
+                  }
+                },
+              ),
+            ),
+          )
+        ],
+      ),
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24.0),
@@ -86,7 +112,7 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: 32),
               
               const Text(
-                'Antigravity Clipboard',
+                'BridgeClip',
                 style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
@@ -95,7 +121,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 8),
               Text(
-                '나만의 클립보드 서랍장에 연결하세요.',
+                LocalizationService.get('login_title'),
                 style: TextStyle(
                   fontSize: 16,
                   color: Colors.white.withOpacity(0.5),
@@ -121,9 +147,9 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    const Text(
-                      '룸 코드 (Room ID)',
-                      style: TextStyle(
+                    Text(
+                      LocalizationService.get('room_id_label'),
+                      style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
                         color: Colors.white70,
@@ -134,7 +160,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       controller: _roomIdController,
                       style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
                       decoration: InputDecoration(
-                        hintText: '예: my_secret_room',
+                        hintText: LocalizationService.get('room_id_hint'),
                         hintStyle: TextStyle(color: Colors.white.withOpacity(0.2)),
                         filled: true,
                         fillColor: Colors.black.withOpacity(0.2),
@@ -152,9 +178,9 @@ class _LoginScreenState extends State<LoginScreen> {
                       onSubmitted: (_) => _login(),
                     ),
                     const SizedBox(height: 20),
-                    const Text(
-                      '보안 암호 (Security Password)',
-                      style: TextStyle(
+                    Text(
+                      LocalizationService.get('password_label'),
+                      style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
                         color: Colors.white70,
@@ -166,7 +192,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       obscureText: true,
                       style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
                       decoration: InputDecoration(
-                        hintText: '종단간 암호화(E2EE)에 사용됩니다',
+                        hintText: LocalizationService.get('password_hint'),
                         hintStyle: TextStyle(color: Colors.white.withOpacity(0.2), fontSize: 15),
                         filled: true,
                         fillColor: Colors.black.withOpacity(0.2),
@@ -204,9 +230,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                 valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                               ),
                             )
-                          : const Text(
-                              '동기화 시작하기',
-                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                          : Text(
+                              LocalizationService.get('btn_start_sync'),
+                              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                             ),
                     ),
                   ],
@@ -220,7 +246,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   Icon(Icons.info_outline, size: 16, color: Colors.white.withOpacity(0.4)),
                   const SizedBox(width: 8),
                   Text(
-                    '다른 기기에서도 같은 코드를 입력하면 연동됩니다.',
+                    LocalizationService.get('login_info'),
                     style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 13),
                   ),
                 ],

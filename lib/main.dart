@@ -15,6 +15,7 @@ import 'package:app_links/app_links.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:tray_manager/tray_manager.dart';
 import 'package:launch_at_startup/launch_at_startup.dart';
+import 'services/localization.dart';
 import 'dart:async';
 import 'dart:io' show Platform, exit;
 
@@ -143,6 +144,7 @@ void _handleLocalNotification(NotificationResponse response) async {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await LocalizationService.init();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   if (Platform.isAndroid || Platform.isIOS) {
@@ -200,10 +202,10 @@ void main() async {
 
       await trayManager.setIcon(Platform.isWindows ? 'assets/app_icon.ico' : 'assets/app_icon.png');
       List<MenuItem> items = [
-        MenuItem(key: 'show_window', label: '설정 화면 열기'),
-        MenuItem(key: 'auto_start', label: '시작프로그램 등록완료 (BridgeClip)'),
+        MenuItem(key: 'show_window', label: LocalizationService.get('tray_show')),
+        MenuItem(key: 'auto_start', label: LocalizationService.get('tray_ready')),
         MenuItem.separator(),
-        MenuItem(key: 'exit_app', label: '완전 종료'),
+        MenuItem(key: 'exit_app', label: LocalizationService.get('tray_exit')),
       ];
       await trayManager.setContextMenu(Menu(items: items));
       trayManager.addListener(desktopTrayListener);
@@ -219,20 +221,25 @@ class ClipboardSyncApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'BridgeClip',
-      theme: ThemeData(
-        brightness: Brightness.dark,
-        scaffoldBackgroundColor: const Color(0xFF121212),
-        colorScheme: ColorScheme.dark(
-          primary: Colors.blueAccent,
-          surface: const Color(0xFF1E1E1E),
-        ),
-        useMaterial3: true,
-        fontFamily: 'Inter',
-      ),
-      home: (initialRoomId == null || initialRoomPassword == null) ? const LoginScreen() : ClipboardHome(roomId: initialRoomId!),
-      debugShowCheckedModeBanner: false,
+    return ValueListenableBuilder<AppLang>(
+      valueListenable: LocalizationService.currentLang,
+      builder: (context, lang, child) {
+        return MaterialApp(
+          title: 'BridgeClip',
+          theme: ThemeData(
+            brightness: Brightness.dark,
+            scaffoldBackgroundColor: const Color(0xFF121212),
+            colorScheme: ColorScheme.dark(
+              primary: Colors.blueAccent,
+              surface: const Color(0xFF1E1E1E),
+            ),
+            useMaterial3: true,
+            fontFamily: 'Inter',
+          ),
+          home: (initialRoomId == null || initialRoomPassword == null) ? const LoginScreen() : ClipboardHome(roomId: initialRoomId!),
+          debugShowCheckedModeBanner: false,
+        );
+      }
     );
   }
 }
@@ -442,7 +449,7 @@ class _ClipboardHomeState extends State<ClipboardHome> with WidgetsBindingObserv
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('닫기', style: TextStyle(color: Colors.white54)),
+              child: Text(LocalizationService.get('close'), style: const TextStyle(color: Colors.white54)),
             ),
             TextButton(
               onPressed: () {
@@ -581,7 +588,7 @@ class _ClipboardHomeState extends State<ClipboardHome> with WidgetsBindingObserv
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: const Text('클립보드에 복사되었습니다!', style: TextStyle(color: Colors.white)),
+        content: Text(LocalizationService.get('copied_toast'), style: const TextStyle(color: Colors.white)),
         backgroundColor: Colors.blueAccent,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -609,21 +616,21 @@ class _ClipboardHomeState extends State<ClipboardHome> with WidgetsBindingObserv
       builder: (context) {
         return AlertDialog(
           backgroundColor: const Color(0xFF1E1E1E),
-          title: const Text('자동 삭제 타이머 ⏱️', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+          title: Text(LocalizationService.get('timer_title'), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              _buildTimerOption('기기 영구 보관', 0),
-              _buildTimerOption('1분 뒤 자동 삭제', 1),
-              _buildTimerOption('10분 뒤 자동 삭제', 10),
-              _buildTimerOption('1시간 뒤 자동 삭제', 60),
-              _buildTimerOption('1일 뒤 자동 삭제', 1440),
+              _buildTimerOption(LocalizationService.get('timer_keep_forever'), 0),
+              _buildTimerOption(LocalizationService.get('timer_1m'), 1),
+              _buildTimerOption(LocalizationService.get('timer_10m'), 10),
+              _buildTimerOption(LocalizationService.get('timer_1h'), 60),
+              _buildTimerOption(LocalizationService.get('timer_1d'), 1440),
             ],
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('닫기', style: TextStyle(color: Colors.white54)),
+              child: Text(LocalizationService.get('close'), style: const TextStyle(color: Colors.white54)),
             ),
           ],
         );
@@ -642,7 +649,7 @@ class _ClipboardHomeState extends State<ClipboardHome> with WidgetsBindingObserv
         setState(() => _autoDeleteMinutes = minutes);
         if (mounted) Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('타이머가 $title(으)로 설정되었습니다.'), backgroundColor: Colors.blueAccent),
+          SnackBar(content: Text(LocalizationService.getFormatted('timer_set_msg', [title])), backgroundColor: Colors.blueAccent),
         );
       },
     );
@@ -652,7 +659,7 @@ class _ClipboardHomeState extends State<ClipboardHome> with WidgetsBindingObserv
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(_isArchiveTab ? '영구 보관함' : '일반 클립보드', style: const TextStyle(fontWeight: FontWeight.bold)),
+        title: Text(_isArchiveTab ? LocalizationService.get('archive') : LocalizationService.get('clipboard'), style: const TextStyle(fontWeight: FontWeight.bold)),
         backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
@@ -672,17 +679,17 @@ class _ClipboardHomeState extends State<ClipboardHome> with WidgetsBindingObserv
                 context: context,
                 builder: (context) => AlertDialog(
                   backgroundColor: const Color(0xFF1E1E1E),
-                  title: const Text('로그아웃', style: TextStyle(color: Colors.white)),
-                  content: const Text('현재 서랍에서 로그아웃하시겠습니까?', style: TextStyle(color: Colors.white70)),
+                  title: Text(LocalizationService.get('logout_title'), style: const TextStyle(color: Colors.white)),
+                  content: Text(LocalizationService.get('logout_msg'), style: const TextStyle(color: Colors.white70)),
                   actions: [
-                    TextButton(onPressed: () => Navigator.pop(context), child: const Text('취소', style: TextStyle(color: Colors.white54))),
+                    TextButton(onPressed: () => Navigator.pop(context), child: Text(LocalizationService.get('cancel'), style: const TextStyle(color: Colors.white54))),
                     TextButton(
                       onPressed: () {
                         Navigator.pop(context);
                         _logout();
                       },
                       style: TextButton.styleFrom(foregroundColor: Colors.redAccent),
-                      child: const Text('로그아웃'),
+                      child: Text(LocalizationService.get('btn_logout')),
                     ),
                   ],
                 ),
@@ -701,16 +708,16 @@ class _ClipboardHomeState extends State<ClipboardHome> with WidgetsBindingObserv
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.end,
-                children: const [
-                  Icon(Icons.dashboard, color: Colors.white, size: 40),
-                  SizedBox(height: 10),
-                  Text('서랍장 메뉴', style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
+                children: [
+                  const Icon(Icons.dashboard, color: Colors.white, size: 40),
+                  const SizedBox(height: 10),
+                  Text(LocalizationService.get('menu'), style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
                 ],
               ),
             ),
             ListTile(
               leading: Icon(Icons.list, color: !_isArchiveTab ? Colors.blueAccent : Colors.white70),
-              title: Text('일반 클립보드', style: TextStyle(color: !_isArchiveTab ? Colors.blueAccent : Colors.white)),
+              title: Text(LocalizationService.get('clipboard'), style: TextStyle(color: !_isArchiveTab ? Colors.blueAccent : Colors.white)),
               selected: !_isArchiveTab,
               onTap: () {
                 setState(() => _isArchiveTab = false);
@@ -719,7 +726,7 @@ class _ClipboardHomeState extends State<ClipboardHome> with WidgetsBindingObserv
             ),
             ListTile(
               leading: Icon(Icons.archive, color: _isArchiveTab ? Colors.blueAccent : Colors.white70),
-              title: Text('영구 보관함', style: TextStyle(color: _isArchiveTab ? Colors.blueAccent : Colors.white)),
+              title: Text(LocalizationService.get('archive'), style: TextStyle(color: _isArchiveTab ? Colors.blueAccent : Colors.white)),
               selected: _isArchiveTab,
               onTap: () {
                 setState(() => _isArchiveTab = true);
@@ -766,10 +773,10 @@ class _ClipboardHomeState extends State<ClipboardHome> with WidgetsBindingObserv
           });
           
           if (items.isEmpty) {
-            return const Center(
-              child: Text('클립보드가 비어 있습니다.\nPC나 스마트폰에서 내용을 복사해보세요!', 
+            return Center(
+              child: Text(LocalizationService.get('empty_list'), 
                 textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.white54, fontSize: 16)
+                style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 16),
               ),
             );
           }
