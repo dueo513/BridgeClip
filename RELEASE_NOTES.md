@@ -50,6 +50,7 @@ Artifacts:
 - Android launcher icon visual check on emulator: passed.
 - Windows release executable smoke test: passed.
 - Release artifact SHA-256 verification: passed.
+- `tools\package_release.ps1` release packaging smoke test: passed.
 - Login screen logo/password hint visual check on emulator: passed.
 - Search field one-character input check on emulator: passed.
 - Android release signing config supports `android/key.properties`; current local package uses debug-key fallback because no private release key is present.

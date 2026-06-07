@@ -143,6 +143,7 @@ C:\Users\shrud\.gemini\antigravity\scratch\flutter\bin\flutter.bat analyze
 C:\Users\shrud\.gemini\antigravity\scratch\flutter\bin\flutter.bat test
 C:\Users\shrud\.gemini\antigravity\scratch\flutter\bin\flutter.bat build windows
 C:\Users\shrud\.gemini\antigravity\scratch\flutter\bin\flutter.bat build apk --release
+C:\Users\shrud\.gemini\antigravity\scratch\flutter\bin\flutter.bat build appbundle --release
 ```
 
 Deploy Firebase support separately:
@@ -160,6 +161,8 @@ Before sharing a build:
 - Run `npm --prefix functions run lint`.
 - Build Windows release.
 - Build Android release APK.
+- Build Android release App Bundle.
+- Package artifacts with `tools\package_release.ps1`.
 - Install and launch the APK.
 - Launch the Windows app.
 - Verify host Windows clipboard upload.
