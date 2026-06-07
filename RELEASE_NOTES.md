@@ -5,7 +5,8 @@
 Artifacts:
 
 - Windows: `release\BridgeClip-20260608-0240\BridgeClip-Windows-release.zip`
-- Android: `release\BridgeClip-20260608-0240\BridgeClip-Android-release.apk`
+- Android APK: `release\BridgeClip-20260608-0240\BridgeClip-Android-release.apk`
+- Android App Bundle: `release\BridgeClip-20260608-0240\BridgeClip-Android-release.aab`
 
 ### Included
 
@@ -40,7 +41,9 @@ Artifacts:
 - `flutter test`: passed, 12 tests.
 - `npm.cmd --prefix functions run lint`: passed.
 - `flutter build apk --release`: passed.
+- `flutter build appbundle --release`: passed.
 - `flutter build windows`: passed.
+- `firebase.cmd deploy --only firestore:rules,functions --project shrud-clip-2026-78fee`: passed.
 - Android APK install on emulator: passed.
 - Android app launch smoke test on emulator: passed.
 - Android launcher icon visual check on emulator: passed.
