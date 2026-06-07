@@ -35,6 +35,7 @@ Release folder:
 - `tools\package_release.ps1` packaged APK, AAB, Windows zip, release documents, and SHA-256 sums successfully in a script smoke check.
 - `tools\package_release.ps1` rewrites packaged `RELEASE_NOTES.md` artifact paths and `RELEASE_AUDIT.md` release folder references to the current `ReleaseId`.
 - `tools\verify_release.ps1` passed for `release\BridgeClip-20260608-0240`, including required artifact checks, SHA-256 verification, Windows zip content checks, and APK signature verification.
+- `tools\verify_release.ps1 -RequireStoreSigning` is available to fail store-submission verification when the APK is still debug-signed.
 - Service account files and `googleapis_auth` are not present in client dependencies or source; only README guidance mentions not shipping service-account credentials.
 - Android release signing is configurable through `android/key.properties`; without that local file, Gradle falls back to the debug signing key for testable local release builds.
 - `tools\create_android_upload_keystore.ps1 -DryRun` passed and found `keytool.exe` from Android Studio JBR.

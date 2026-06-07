@@ -182,6 +182,12 @@ powershell -NoProfile -ExecutionPolicy Bypass -File tools\package_release.ps1 -B
 powershell -NoProfile -ExecutionPolicy Bypass -File tools\verify_release.ps1
 ```
 
+For a store-submission gate, require a non-debug APK signer:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File tools\verify_release.ps1 -ReleasePath release\BridgeClip-20260608-0240 -RequireStoreSigning
+```
+
 ## Release Checklist
 
 Before sharing a build:
@@ -196,6 +202,8 @@ Before sharing a build:
 - Build Android release App Bundle.
 - Package artifacts with `tools\package_release.ps1`.
 - Verify packaged artifacts with `tools\verify_release.ps1`.
+- For store submission, verify packaged artifacts with
+  `tools\verify_release.ps1 -RequireStoreSigning`.
 - Install and launch the APK.
 - Launch the Windows app.
 - Verify host Windows clipboard upload.

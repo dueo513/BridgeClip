@@ -1,6 +1,7 @@
 param(
   [Parameter(Mandatory = $true)]
-  [string]$ReleasePath
+  [string]$ReleasePath,
+  [switch]$RequireStoreSigning
 )
 
 $ErrorActionPreference = "Stop"
@@ -71,7 +72,12 @@ if ($failures.Count -eq 0) {
     Select-Object -Last 1
 
   if ($null -eq $apksigner) {
-    $warnings.Add("apksigner.bat not found; APK signer certificate was not checked.")
+    $message = "apksigner.bat not found; APK signer certificate was not checked."
+    if ($RequireStoreSigning) {
+      $failures.Add($message)
+    } else {
+      $warnings.Add($message)
+    }
   } else {
     $apkPath = Join-Path $releaseRoot "BridgeClip-Android-release.apk"
     $apkSignOutput = & $apksigner.FullName verify --verbose --print-certs $apkPath 2>&1
@@ -80,7 +86,12 @@ if ($failures.Count -eq 0) {
     } else {
       $signerLine = $apkSignOutput | Where-Object { $_ -like "*certificate DN:*" } | Select-Object -First 1
       if ($signerLine -like "*Android Debug*") {
-        $warnings.Add("APK is signed with Android Debug certificate. Use android/key.properties for store submission.")
+        $message = "APK is signed with Android Debug certificate. Use android/key.properties for store submission."
+        if ($RequireStoreSigning) {
+          $failures.Add($message)
+        } else {
+          $warnings.Add($message)
+        }
       }
     }
   }
