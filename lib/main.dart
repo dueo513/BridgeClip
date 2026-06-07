@@ -36,6 +36,7 @@ import 'widgets/clipboard_body.dart';
 import 'widgets/connect_device_sheet.dart';
 import 'widgets/language_menu_button.dart';
 import 'widgets/locked_scaffold.dart';
+import 'widgets/select_copy_dialog.dart';
 import 'widgets/settings_body.dart';
 
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
@@ -776,57 +777,10 @@ class _ClipboardHomeState extends State<ClipboardHome>
 
   void _showSelectCopyDialog(String text) {
     if (!mounted) return;
-    final controller = TextEditingController(text: text);
     showDialog<void>(
       context: context,
-      builder: (context) {
-        return AlertDialog(
-          backgroundColor: const Color(0xFF1E1E1E),
-          title: Text(
-            LocalizationService.get('select_copy_title'),
-            style: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          content: TextField(
-            controller: controller,
-            maxLines: null,
-            keyboardType: TextInputType.multiline,
-            style: const TextStyle(color: Colors.white, fontSize: 16),
-            decoration: InputDecoration(
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide.none,
-              ),
-              fillColor: Colors.black.withValues(alpha: 0.2),
-              filled: true,
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text(
-                LocalizationService.get('close'),
-                style: const TextStyle(color: Colors.white54),
-              ),
-            ),
-            TextButton(
-              onPressed: () {
-                _copyToLocalClipboard(controller.text);
-                Navigator.pop(context);
-              },
-              child: Text(
-                LocalizationService.get('copy_selected'),
-                style: const TextStyle(
-                  color: Colors.blueAccent,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ],
-        );
-      },
+      builder: (_) =>
+          SelectCopyDialog(text: text, onCopy: _copyToLocalClipboard),
     );
   }
 
