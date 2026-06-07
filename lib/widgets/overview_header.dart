@@ -13,6 +13,7 @@ class OverviewHeader extends StatelessWidget {
     required this.textColor,
     required this.mutedTextColor,
     this.trailing,
+    this.pillsLabel,
   });
 
   final IconData icon;
@@ -25,6 +26,7 @@ class OverviewHeader extends StatelessWidget {
   final Color textColor;
   final Color mutedTextColor;
   final Widget? trailing;
+  final String? pillsLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -111,6 +113,17 @@ class OverviewHeader extends StatelessWidget {
             ),
             if (pills.isNotEmpty) ...[
               const SizedBox(height: 14),
+              if (pillsLabel != null) ...[
+                Text(
+                  pillsLabel!,
+                  style: TextStyle(
+                    color: mutedTextColor,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(height: 8),
+              ],
               Wrap(spacing: 8, runSpacing: 8, children: pills),
             ],
           ],

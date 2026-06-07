@@ -26,11 +26,22 @@ class TopIconButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final accent = danger
         ? Colors.redAccent
         : active
         ? primaryColor
         : mutedTextColor;
+    final fillColor = danger
+        ? Colors.redAccent.withValues(alpha: isDark ? 0.16 : 0.10)
+        : active
+        ? primaryColor.withValues(alpha: isDark ? 0.22 : 0.14)
+        : softFillColor;
+    final strokeColor = danger
+        ? Colors.redAccent.withValues(alpha: 0.34)
+        : active
+        ? primaryColor.withValues(alpha: 0.42)
+        : borderColor;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 3),
@@ -43,15 +54,18 @@ class TopIconButton extends StatelessWidget {
             width: 38,
             height: 38,
             decoration: BoxDecoration(
-              color: active
-                  ? primaryColor.withValues(alpha: 0.13)
-                  : softFillColor,
+              color: fillColor,
               borderRadius: BorderRadius.circular(14),
-              border: Border.all(
-                color: active
-                    ? primaryColor.withValues(alpha: 0.22)
-                    : borderColor,
-              ),
+              border: Border.all(color: strokeColor),
+              boxShadow: active
+                  ? [
+                      BoxShadow(
+                        color: primaryColor.withValues(alpha: 0.14),
+                        blurRadius: 14,
+                        offset: const Offset(0, 6),
+                      ),
+                    ]
+                  : null,
             ),
             child: Icon(icon, color: accent, size: 21),
           ),

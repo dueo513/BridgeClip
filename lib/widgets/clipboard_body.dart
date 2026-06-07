@@ -18,6 +18,7 @@ class ClipboardBody extends StatelessWidget {
     required this.lang,
     required this.isArchiveTab,
     required this.notificationsEnabled,
+    required this.autoDeleteMinutes,
     required this.searchController,
     required this.searchQuery,
     required this.deviceFilter,
@@ -46,6 +47,7 @@ class ClipboardBody extends StatelessWidget {
   final AppLang lang;
   final bool isArchiveTab;
   final bool notificationsEnabled;
+  final int autoDeleteMinutes;
   final TextEditingController searchController;
   final String searchQuery;
   final String deviceFilter;
@@ -103,9 +105,11 @@ class ClipboardBody extends StatelessWidget {
                   : LocalizationService.get('clipboard'),
               subtitle:
                   '${LocalizationService.get('room_short_label')} ${_compactRoomId(roomId)}',
+              pillsLabel: LocalizationService.get('status_summary'),
               pills: [
                 StatusPill(
                   icon: Icons.layers_rounded,
+                  label: LocalizationService.get('status_items'),
                   text: LocalizationService.getFormatted('items_count', [
                     '${items.length}',
                   ]),
@@ -116,11 +120,23 @@ class ClipboardBody extends StatelessWidget {
                   icon: notificationsEnabled
                       ? Icons.notifications_active_rounded
                       : Icons.notifications_off_rounded,
+                  label: LocalizationService.get('status_notifications'),
                   text: notificationsEnabled
-                      ? LocalizationService.get('notification_enabled')
-                      : LocalizationService.get('notification_disabled'),
+                      ? LocalizationService.get('status_on')
+                      : LocalizationService.get('status_off'),
                   primaryColor: primaryColor,
                   textColor: textColor,
+                  color: notificationsEnabled ? Colors.green : Colors.orange,
+                ),
+                StatusPill(
+                  icon: autoDeleteMinutes > 0
+                      ? Icons.timer_rounded
+                      : Icons.all_inclusive_rounded,
+                  label: LocalizationService.get('status_auto_delete'),
+                  text: _autoDeleteLabel(),
+                  primaryColor: primaryColor,
+                  textColor: textColor,
+                  color: autoDeleteMinutes > 0 ? Colors.indigoAccent : null,
                 ),
                 if (hasActiveFilters)
                   StatusPill(
@@ -222,5 +238,18 @@ class ClipboardBody extends StatelessWidget {
   String _compactRoomId(String roomId) {
     if (roomId.length <= 18) return roomId;
     return '${roomId.substring(0, 11)}...${roomId.substring(roomId.length - 4)}';
+  }
+
+  String _autoDeleteLabel() {
+    return switch (autoDeleteMinutes) {
+      0 => LocalizationService.get('status_off'),
+      1 => LocalizationService.get('timer_1m_short'),
+      10 => LocalizationService.get('timer_10m_short'),
+      60 => LocalizationService.get('timer_1h_short'),
+      1440 => LocalizationService.get('timer_1d_short'),
+      _ => LocalizationService.getFormatted('timer_minutes_short', [
+        '$autoDeleteMinutes',
+      ]),
+    };
   }
 }

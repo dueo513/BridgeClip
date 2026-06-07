@@ -19,6 +19,7 @@ import 'models/device_info.dart';
 import 'screens/login_screen.dart';
 import 'screens/onboarding_screen.dart';
 import 'services/app_lock_service.dart';
+import 'services/auto_delete_policy.dart';
 import 'services/clipboard_upload_coordinator.dart';
 import 'services/crypto_service.dart';
 import 'services/database_service.dart';
@@ -279,6 +280,7 @@ class _ClipboardHomeState extends State<ClipboardHome>
   String _deviceFilter = 'all';
   String _timeFilter = 'all';
   int _autoDeleteMinutes = 0;
+  DateTime? _autoDeleteActivatedAt;
   bool _isWritingClipboardFromApp = false;
 
   Color get _primaryColor => Theme.of(context).colorScheme.primary;
@@ -456,9 +458,24 @@ class _ClipboardHomeState extends State<ClipboardHome>
 
   Future<void> _loadExpireSettings() async {
     final prefs = await SharedPreferences.getInstance();
+    final minutes = prefs.getInt('autoDeleteMinutes') ?? 0;
+    final activatedAtMs = prefs.getInt('autoDeleteActivatedAtMs');
+    var activatedAt = activatedAtMs == null
+        ? null
+        : DateTime.fromMillisecondsSinceEpoch(activatedAtMs);
+
+    if (minutes > 0 && activatedAt == null) {
+      activatedAt = DateTime.now();
+      await prefs.setInt(
+        'autoDeleteActivatedAtMs',
+        activatedAt.millisecondsSinceEpoch,
+      );
+    }
+
     if (!mounted) return;
     setState(() {
-      _autoDeleteMinutes = prefs.getInt('autoDeleteMinutes') ?? 0;
+      _autoDeleteMinutes = minutes;
+      _autoDeleteActivatedAt = activatedAt;
     });
   }
 
@@ -925,10 +942,22 @@ class _ClipboardHomeState extends State<ClipboardHome>
 
   Future<void> _setAutoDeleteTimer(AutoDeleteTimerChoice choice) async {
     final prefs = await SharedPreferences.getInstance();
+    final activatedAt = choice.minutes > 0 ? DateTime.now() : null;
     await prefs.setInt('autoDeleteMinutes', choice.minutes);
+    if (activatedAt == null) {
+      await prefs.remove('autoDeleteActivatedAtMs');
+    } else {
+      await prefs.setInt(
+        'autoDeleteActivatedAtMs',
+        activatedAt.millisecondsSinceEpoch,
+      );
+    }
 
     if (!mounted) return;
-    setState(() => _autoDeleteMinutes = choice.minutes);
+    setState(() {
+      _autoDeleteMinutes = choice.minutes;
+      _autoDeleteActivatedAt = activatedAt;
+    });
     Navigator.pop(context);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -1340,6 +1369,7 @@ class _ClipboardHomeState extends State<ClipboardHome>
       lang: lang,
       isArchiveTab: _isArchiveTab,
       notificationsEnabled: _isNotificationEnabled,
+      autoDeleteMinutes: _autoDeleteMinutes,
       searchController: _searchController,
       searchQuery: _searchQuery,
       deviceFilter: _deviceFilter,
@@ -1552,13 +1582,16 @@ class _ClipboardHomeState extends State<ClipboardHome>
     for (final item in allItems) {
       if (_optimisticDeletedIds.contains(item.id)) continue;
 
-      if (_autoDeleteMinutes > 0 && !item.isPinned) {
-        final expired =
-            now.difference(item.timestamp).inMinutes >= _autoDeleteMinutes;
-        if (expired) {
-          Future.microtask(() => _db.deleteItem(item.id));
-          continue;
-        }
+      final shouldAutoDelete = AutoDeletePolicy.shouldDelete(
+        itemTimestamp: item.timestamp,
+        isPinned: item.isPinned,
+        autoDeleteMinutes: _autoDeleteMinutes,
+        activatedAt: _autoDeleteActivatedAt,
+        now: now,
+      );
+      if (shouldAutoDelete) {
+        Future.microtask(() => _db.deleteItem(item.id));
+        continue;
       }
 
       if (_isArchiveTab == item.isPinned) {

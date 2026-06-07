@@ -8,6 +8,7 @@ class StatusPill extends StatelessWidget {
     required this.primaryColor,
     required this.textColor,
     this.color,
+    this.label,
   });
 
   final IconData icon;
@@ -15,6 +16,7 @@ class StatusPill extends StatelessWidget {
   final Color primaryColor;
   final Color textColor;
   final Color? color;
+  final String? label;
 
   @override
   Widget build(BuildContext context) {
@@ -32,12 +34,25 @@ class StatusPill extends StatelessWidget {
         children: [
           Icon(icon, size: 15, color: accent),
           const SizedBox(width: 6),
+          if (label != null) ...[
+            Text(
+              label!,
+              style: TextStyle(
+                color: textColor.withValues(alpha: 0.56),
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(width: 5),
+          ],
           Text(
             text,
             style: TextStyle(
-              color: textColor.withValues(alpha: 0.82),
+              color: textColor.withValues(alpha: 0.86),
               fontSize: 12,
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.w800,
             ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
