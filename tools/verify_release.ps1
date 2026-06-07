@@ -25,6 +25,34 @@ function Resolve-ReleaseRoot {
   return $latestRelease.FullName
 }
 
+function Find-Jarsigner {
+  $pathJarsigner = Get-Command "jarsigner.exe" -ErrorAction SilentlyContinue
+  if ($null -ne $pathJarsigner) {
+    return $pathJarsigner.Source
+  }
+
+  if ($env:JAVA_HOME) {
+    $javaHomeJarsigner = Join-Path $env:JAVA_HOME "bin\jarsigner.exe"
+    if (Test-Path $javaHomeJarsigner) {
+      return $javaHomeJarsigner
+    }
+  }
+
+  $knownJarsigners = @(
+    "C:\Program Files\Android\Android Studio\jbr\bin\jarsigner.exe",
+    "C:\Program Files\Java\jdk-17\bin\jarsigner.exe",
+    "C:\Program Files\Java\jdk-21\bin\jarsigner.exe"
+  )
+
+  foreach ($candidate in $knownJarsigners) {
+    if (Test-Path $candidate) {
+      return $candidate
+    }
+  }
+
+  return $null
+}
+
 $releaseRoot = Resolve-ReleaseRoot -Path $ReleasePath
 $requiredFiles = @(
   "BridgeClip-Android-release.apk",
@@ -84,7 +112,9 @@ if ($failures.Count -eq 0) {
   }
 }
 
-if ($failures.Count -eq 0) {
+$releaseStructureOk = $failures.Count -eq 0
+
+if ($releaseStructureOk) {
   $androidSdk = Join-Path $env:LOCALAPPDATA "Android\Sdk"
   $apksigner = Get-ChildItem $androidSdk -Recurse -Filter "apksigner.bat" -ErrorAction SilentlyContinue |
     Sort-Object FullName |
@@ -111,6 +141,33 @@ if ($failures.Count -eq 0) {
         } else {
           $warnings.Add($message)
         }
+      }
+    }
+  }
+}
+
+if ($releaseStructureOk) {
+  $jarsigner = Find-Jarsigner
+
+  if ($null -eq $jarsigner) {
+    $message = "jarsigner.exe not found; Android App Bundle signer certificate was not checked."
+    if ($RequireStoreSigning) {
+      $failures.Add($message)
+    } else {
+      $warnings.Add($message)
+    }
+  } else {
+    $aabPath = Join-Path $releaseRoot "BridgeClip-Android-release.aab"
+    $aabSignOutput = & $jarsigner -verify -verbose -certs $aabPath 2>&1
+    $aabOutputText = $aabSignOutput -join "`n"
+    if ($aabOutputText -notmatch "jar verified\.") {
+      $failures.Add("Android App Bundle signature verification failed.")
+    } elseif ($aabOutputText -like "*CN=Android Debug*") {
+      $message = "Android App Bundle is signed with Android Debug certificate. Use android/key.properties for store submission."
+      if ($RequireStoreSigning) {
+        $failures.Add($message)
+      } else {
+        $warnings.Add($message)
       }
     }
   }
