@@ -1050,6 +1050,8 @@ class _ClipboardHomeState extends State<ClipboardHome>
               padding: EdgeInsets.zero,
               children: [
                 DrawerHeader(
+                  margin: EdgeInsets.zero,
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 22),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       begin: Alignment.topLeft,
@@ -1111,6 +1113,7 @@ class _ClipboardHomeState extends State<ClipboardHome>
                             style: TextStyle(
                               color: Colors.white.withValues(alpha: 0.82),
                               fontSize: 12,
+                              height: 1.2,
                               fontWeight: FontWeight.w700,
                             ),
                           ),
