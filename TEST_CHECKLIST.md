@@ -6,6 +6,7 @@ Use this checklist before sharing a build.
 
 - [ ] `flutter analyze`
 - [ ] `flutter test`
+- [ ] `npm --prefix functions run lint`
 - [ ] `flutter build windows`
 - [ ] `flutter build apk --release`
 - [ ] `firebase deploy --only firestore:rules,functions`
@@ -58,6 +59,8 @@ Windows host clipboard. Treat emulator sync results as a smoke test only.
 - [ ] Windows and Android have different `deviceId` values.
 - [ ] Same password decrypts the same room on both devices.
 - [ ] Wrong password shows unreadable/decryption-failed content.
+- [ ] Isolated Android emulator upload records `platform=android`.
+- [ ] Host Windows upload records `platform=windows`.
 - [ ] Android to Windows sync does not create a Windows duplicate.
 - [ ] Windows to Android sync does not create an Android duplicate.
 - [ ] Auto-delete removes non-pinned items after the configured delay.

@@ -13,8 +13,8 @@ and iOS are planned as a later Apple platform phase.
 - Backend: Firebase Auth, Firestore, Cloud Functions, FCM
 - Encryption: AES-256-GCM with a PBKDF2-derived key
 - Latest validated artifacts:
-  - `C:\Users\shrud\.gemini\antigravity\scratch\bridgeclip_release_2026-06-05\BridgeClip-Windows-2026-06-06-echo-guard.zip`
-  - `C:\Users\shrud\.gemini\antigravity\scratch\bridgeclip_release_2026-06-05\BridgeClip-Android-2026-06-06-echo-guard.apk`
+  - `C:\Users\shrud\.gemini\antigravity\scratch\bridgeclip_release_2026-06-05\BridgeClip-Windows-2026-06-07-host-emulator-final.zip`
+  - `C:\Users\shrud\.gemini\antigravity\scratch\bridgeclip_release_2026-06-05\BridgeClip-Android-2026-06-07-host-emulator-final.apk`
 
 ## Features
 
@@ -157,12 +157,13 @@ Before sharing a build:
 
 - Run `flutter analyze`.
 - Run `flutter test`.
+- Run `npm --prefix functions run lint`.
 - Build Windows release.
 - Build Android release APK.
 - Install and launch the APK.
 - Launch the Windows app.
-- Verify Windows to Android sync.
-- Verify Android Quick Sync to Windows.
+- Verify host Windows clipboard upload.
+- Verify isolated Android emulator Quick Sync upload.
 - Verify no echo upload duplicate is created.
 - Verify notification actions on a real Android phone.
 - Verify the Quick Settings tile on a real Android phone.

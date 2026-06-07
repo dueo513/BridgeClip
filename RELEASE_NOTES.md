@@ -1,11 +1,11 @@
 # BridgeClip Release Notes
 
-## 2026-06-06 Echo Guard Build
+## 2026-06-07 Host + Emulator Final Build
 
 Artifacts:
 
-- Windows: `C:\Users\shrud\.gemini\antigravity\scratch\bridgeclip_release_2026-06-05\BridgeClip-Windows-2026-06-06-echo-guard.zip`
-- Android: `C:\Users\shrud\.gemini\antigravity\scratch\bridgeclip_release_2026-06-05\BridgeClip-Android-2026-06-06-echo-guard.apk`
+- Windows: `C:\Users\shrud\.gemini\antigravity\scratch\bridgeclip_release_2026-06-05\BridgeClip-Windows-2026-06-07-host-emulator-final.zip`
+- Android: `C:\Users\shrud\.gemini\antigravity\scratch\bridgeclip_release_2026-06-05\BridgeClip-Android-2026-06-07-host-emulator-final.apk`
 
 ### Added
 
@@ -22,6 +22,7 @@ Artifacts:
 
 ### Changed
 
+- Android Quick Sync waits for pending Firestore writes before closing the app.
 - Firebase token documents now use `tokens/{deviceId}` as the primary registry.
 - Clipboard items include optional `deviceId` and `contentHash`.
 - Windows uses Firestore/Auth REST calls for stability.
@@ -33,17 +34,21 @@ Artifacts:
 
 - `flutter analyze`: passed.
 - `flutter test`: passed, 9 tests.
+- `npm --prefix functions run lint`: passed.
 - `flutter build windows`: passed.
 - `flutter build apk --release`: passed.
+- `firebase deploy --only firestore:rules,functions`: passed.
 - Android APK install on emulator: passed.
 - Android app launch smoke test: passed.
 - Windows app launch smoke test: passed.
-- Android Quick Sync to Firestore: passed.
-- Windows receive from Android Quick Sync: passed.
-- Echo duplicate check: passed, one Firestore document for the tested text.
+- Isolated Android emulator Quick Sync to Firestore: passed.
+- Host Windows clipboard upload to Firestore: passed.
+- Encrypted Firestore payloads decrypted with the room password and matched the tested text.
+- Echo duplicate check: passed in prior guard validation, one Firestore document for the tested text.
 
 ### Still Needs Real Phone QA
 
+- Windows-to-physical-Android notification delivery.
 - Android notification delivery on a physical phone.
 - Android notification copy action.
 - Android notification select-copy action.
