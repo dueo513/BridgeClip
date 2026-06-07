@@ -1049,9 +1049,9 @@ class _ClipboardHomeState extends State<ClipboardHome>
             child: ListView(
               padding: EdgeInsets.zero,
               children: [
-                DrawerHeader(
-                  margin: EdgeInsets.zero,
-                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 22),
+                Container(
+                  height: 214,
+                  padding: const EdgeInsets.fromLTRB(20, 22, 20, 18),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       begin: Alignment.topLeft,
@@ -1064,58 +1064,64 @@ class _ClipboardHomeState extends State<ClipboardHome>
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      Container(
-                        width: 44,
-                        height: 44,
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.16),
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                        child: const Icon(
-                          Icons.cloud_sync_rounded,
-                          color: Colors.white,
-                          size: 26,
-                        ),
+                      Row(
+                        children: [
+                          Container(
+                            width: 48,
+                            height: 48,
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.18),
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color: Colors.white.withValues(alpha: 0.18),
+                              ),
+                            ),
+                            child: const Icon(
+                              Icons.content_paste_go_rounded,
+                              color: Colors.white,
+                              size: 27,
+                            ),
+                          ),
+                          const Spacer(),
+                          Container(
+                            width: 38,
+                            height: 38,
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.13),
+                              borderRadius: BorderRadius.circular(13),
+                            ),
+                            child: const Icon(
+                              Icons.hub_rounded,
+                              color: Colors.white,
+                              size: 21,
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 12),
+                      const Spacer(),
                       const Text(
                         'BridgeClip',
                         style: TextStyle(
                           color: Colors.white,
-                          fontSize: 25,
-                          fontWeight: FontWeight.w800,
+                          fontSize: 27,
+                          height: 1.05,
+                          fontWeight: FontWeight.w900,
                         ),
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        '${LocalizationService.get('room_short_label')} ${_compactRoomId(widget.roomId)}',
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.72),
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 10),
-                      Row(
+                      const SizedBox(height: 12),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
                         children: [
-                          Icon(
-                            Icons.check_circle_rounded,
-                            color: Colors.white.withValues(alpha: 0.85),
-                            size: 15,
+                          _drawerHeaderChip(
+                            icon: Icons.meeting_room_rounded,
+                            text:
+                                '${LocalizationService.get('room_short_label')} ${_compactRoomId(widget.roomId)}',
                           ),
-                          const SizedBox(width: 6),
-                          Text(
-                            LocalizationService.get('sync_ready'),
-                            style: TextStyle(
-                              color: Colors.white.withValues(alpha: 0.82),
-                              fontSize: 12,
-                              height: 1.2,
-                              fontWeight: FontWeight.w700,
-                            ),
+                          _drawerHeaderChip(
+                            icon: Icons.check_circle_rounded,
+                            text: LocalizationService.get('sync_ready'),
                           ),
                         ],
                       ),
@@ -1266,6 +1272,38 @@ class _ClipboardHomeState extends State<ClipboardHome>
           : LocalizationService.get('language_en'),
       iconFor: (_) => Icons.language_rounded,
       onSelected: LocalizationService.setLanguage,
+    );
+  }
+
+  Widget _drawerHeaderChip({required IconData icon, required String text}) {
+    return Container(
+      constraints: const BoxConstraints(maxWidth: 210),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.16)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: Colors.white.withValues(alpha: 0.88), size: 15),
+          const SizedBox(width: 6),
+          Flexible(
+            child: Text(
+              text,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.88),
+                fontSize: 12,
+                height: 1.1,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
