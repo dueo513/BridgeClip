@@ -6,7 +6,6 @@ import '../models/device_info.dart';
 import '../services/localization.dart';
 import '../services/platform_service.dart';
 import '../services/theme_service.dart';
-import 'settings_check_card.dart';
 
 class SettingsBody extends StatelessWidget {
   const SettingsBody({
@@ -65,10 +64,6 @@ class SettingsBody extends StatelessWidget {
       builder: (context, snapshot) {
         final devices = snapshot.data ?? const <DeviceInfo>[];
         final currentDevice = _currentDevice(devices);
-        final platform =
-            currentDevice?.platform ?? PlatformService.platformName();
-        final hasPushToken =
-            currentDevice?.token != null && currentDevice!.token!.isNotEmpty;
         final notificationsOn =
             currentDevice?.notificationsEnabled ?? notificationsEnabled;
 
@@ -158,23 +153,6 @@ class SettingsBody extends StatelessWidget {
                         : LocalizationService.get('status_off'),
                   ),
               ],
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: SettingsCheckCard(
-                roomId: roomId,
-                deviceId: currentDeviceId ?? currentDevice?.id,
-                platform: platform,
-                hasPushToken: hasPushToken,
-                notificationsOn: notificationsOn,
-                appLockEnabled: appLockEnabled,
-                launchAtStartupEnabled: launchAtStartupEnabled,
-                primaryColor: primaryColor,
-                surfaceColor: surfaceColor,
-                borderColor: borderColor,
-                textColor: textColor,
-                mutedTextColor: mutedTextColor,
-              ),
             ),
             _section(
               title: LocalizationService.get('settings_account'),
