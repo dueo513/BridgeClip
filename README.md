@@ -189,7 +189,8 @@ The verifier checks that file against the release being verified. When
 `-ReleasePath` is omitted, the verifier uses the newest official
 `release\BridgeClip-YYYYMMDD-HHMM` folder.
 Each package also includes `RELEASE_MANIFEST.json`, which records artifact
-paths, sizes, SHA-256 hashes, and the source commit used for packaging.
+paths, sizes, SHA-256 hashes, Android signing state, store readiness, and the
+source commit used for packaging.
 
 For a store-submission gate, require non-debug Android APK and App Bundle signers:
 

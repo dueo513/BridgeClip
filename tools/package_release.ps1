@@ -42,6 +42,106 @@ function Update-PackagedReleasePaths {
   Set-Content -Encoding UTF8 -Path $Path -Value $content
 }
 
+function Find-Apksigner {
+  $androidSdk = Join-Path $env:LOCALAPPDATA "Android\Sdk"
+  Get-ChildItem $androidSdk -Recurse -Filter "apksigner.bat" -ErrorAction SilentlyContinue |
+    Sort-Object FullName |
+    Select-Object -Last 1
+}
+
+function Find-Jarsigner {
+  $pathJarsigner = Get-Command "jarsigner.exe" -ErrorAction SilentlyContinue
+  if ($null -ne $pathJarsigner) {
+    return $pathJarsigner.Source
+  }
+
+  if ($env:JAVA_HOME) {
+    $javaHomeJarsigner = Join-Path $env:JAVA_HOME "bin\jarsigner.exe"
+    if (Test-Path $javaHomeJarsigner) {
+      return $javaHomeJarsigner
+    }
+  }
+
+  $knownJarsigners = @(
+    "C:\Program Files\Android\Android Studio\jbr\bin\jarsigner.exe",
+    "C:\Program Files\Java\jdk-17\bin\jarsigner.exe",
+    "C:\Program Files\Java\jdk-21\bin\jarsigner.exe"
+  )
+
+  foreach ($candidate in $knownJarsigners) {
+    if (Test-Path $candidate) {
+      return $candidate
+    }
+  }
+
+  return $null
+}
+
+function Get-ApkSigningInfo {
+  param([string]$ApkPath)
+
+  $apksigner = Find-Apksigner
+  if ($null -eq $apksigner) {
+    return [ordered]@{
+      checked = $false
+      debugCertificate = $null
+      certificate = $null
+      error = "apksigner.bat not found"
+    }
+  }
+
+  $output = & $apksigner.FullName verify --verbose --print-certs $ApkPath 2>&1
+  if ($LASTEXITCODE -ne 0) {
+    return [ordered]@{
+      checked = $false
+      debugCertificate = $null
+      certificate = $null
+      error = "APK signature verification failed"
+    }
+  }
+
+  $signerLine = $output | Where-Object { $_ -like "*certificate DN:*" } | Select-Object -First 1
+  return [ordered]@{
+    checked = $true
+    debugCertificate = ($signerLine -like "*Android Debug*")
+    certificate = "$signerLine"
+    error = $null
+  }
+}
+
+function Get-AabSigningInfo {
+  param([string]$AabPath)
+
+  $jarsigner = Find-Jarsigner
+  if ($null -eq $jarsigner) {
+    return [ordered]@{
+      checked = $false
+      debugCertificate = $null
+      certificate = $null
+      error = "jarsigner.exe not found"
+    }
+  }
+
+  $output = & $jarsigner -verify -verbose -certs $AabPath 2>&1
+  $outputText = $output -join "`n"
+  if ($outputText -notmatch "jar verified\.") {
+    return [ordered]@{
+      checked = $false
+      debugCertificate = $null
+      certificate = $null
+      error = "Android App Bundle signature verification failed"
+    }
+  }
+
+  $signerLine = $output | Where-Object { $_ -like "*Signed by*" } | Select-Object -Last 1
+  return [ordered]@{
+    checked = $true
+    debugCertificate = ($outputText -like "*CN=Android Debug*")
+    certificate = "$signerLine"
+    error = $null
+  }
+}
+
 if ($Build) {
   & $flutter build apk --release
   & $flutter build appbundle --release
@@ -109,12 +209,26 @@ try {
   $gitCommit = $null
 }
 
+$apkSigning = Get-ApkSigningInfo -ApkPath (Join-Path $releaseRoot "BridgeClip-Android-release.apk")
+$aabSigning = Get-AabSigningInfo -AabPath (Join-Path $releaseRoot "BridgeClip-Android-release.aab")
+$storeReady = (
+  $apkSigning.checked -eq $true -and
+  $aabSigning.checked -eq $true -and
+  $apkSigning.debugCertificate -eq $false -and
+  $aabSigning.debugCertificate -eq $false
+)
+
 $manifest = [ordered]@{
   name = "BridgeClip"
   releaseId = $ReleaseId
   releasePath = "release\BridgeClip-$ReleaseId"
   generatedAtUtc = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
   gitCommit = $gitCommit
+  androidSigning = [ordered]@{
+    apk = $apkSigning
+    appBundle = $aabSigning
+    storeReady = $storeReady
+  }
   artifacts = $manifestArtifacts
 }
 

@@ -37,7 +37,7 @@ Release folder:
 - `tools\package_release.ps1` writes `release\LATEST.txt` after successful packaging.
 - `tools\package_release.ps1` restores the previous `release\LATEST.txt` if automatic release verification fails.
 - `tools\verify_release.ps1` checks that `release\LATEST.txt` matches the verified release.
-- Release packages include `RELEASE_MANIFEST.json`, and `tools\verify_release.ps1` checks its release ID, paths, hashes, and sizes.
+- Release packages include `RELEASE_MANIFEST.json`, and `tools\verify_release.ps1` checks its release ID, paths, hashes, sizes, Android signing state, and store readiness.
 - `tools\run_release_checks.ps1` runs Flutter analyze, Flutter tests, Functions lint, and release verification as one final gate.
 - `tools\package_release.ps1` rewrites packaged `RELEASE_NOTES.md` artifact paths and `RELEASE_AUDIT.md` release folder references to the current `ReleaseId`.
 - `tools\verify_release.ps1` passed for `release\BridgeClip-20260608-0401`, including required artifact checks, SHA-256 verification, Windows zip content checks, manifest checks, and APK/AAB signature verification.

@@ -71,6 +71,10 @@ $requiredFiles = @(
 
 $failures = New-Object System.Collections.Generic.List[string]
 $warnings = New-Object System.Collections.Generic.List[string]
+$apkSigningChecked = $false
+$apkDebugCertificate = $null
+$aabSigningChecked = $false
+$aabDebugCertificate = $null
 
 foreach ($file in $requiredFiles) {
   $path = Join-Path $releaseRoot $file
@@ -215,8 +219,10 @@ if ($releaseStructureOk) {
     if ($LASTEXITCODE -ne 0) {
       $failures.Add("APK signature verification failed.")
     } else {
+      $apkSigningChecked = $true
       $signerLine = $apkSignOutput | Where-Object { $_ -like "*certificate DN:*" } | Select-Object -First 1
-      if ($signerLine -like "*Android Debug*") {
+      $apkDebugCertificate = ($signerLine -like "*Android Debug*")
+      if ($apkDebugCertificate) {
         $message = "APK is signed with Android Debug certificate. Use android/key.properties for store submission."
         if ($RequireStoreSigning) {
           $failures.Add($message)
@@ -244,13 +250,50 @@ if ($releaseStructureOk) {
     $aabOutputText = $aabSignOutput -join "`n"
     if ($aabOutputText -notmatch "jar verified\.") {
       $failures.Add("Android App Bundle signature verification failed.")
-    } elseif ($aabOutputText -like "*CN=Android Debug*") {
-      $message = "Android App Bundle is signed with Android Debug certificate. Use android/key.properties for store submission."
-      if ($RequireStoreSigning) {
-        $failures.Add($message)
-      } else {
-        $warnings.Add($message)
+    } else {
+      $aabSigningChecked = $true
+      $aabDebugCertificate = ($aabOutputText -like "*CN=Android Debug*")
+      if ($aabDebugCertificate) {
+        $message = "Android App Bundle is signed with Android Debug certificate. Use android/key.properties for store submission."
+        if ($RequireStoreSigning) {
+          $failures.Add($message)
+        } else {
+          $warnings.Add($message)
+        }
       }
+    }
+  }
+}
+
+if ($null -ne $manifest -and $releaseStructureOk) {
+  if ($null -eq $manifest.androidSigning) {
+    $failures.Add("RELEASE_MANIFEST.json missing androidSigning section.")
+  } else {
+    if ([bool]$manifest.androidSigning.apk.checked -ne $apkSigningChecked) {
+      $failures.Add("RELEASE_MANIFEST.json APK signing checked state mismatch.")
+    }
+
+    if ($apkSigningChecked -and [bool]$manifest.androidSigning.apk.debugCertificate -ne [bool]$apkDebugCertificate) {
+      $failures.Add("RELEASE_MANIFEST.json APK debug signing state mismatch.")
+    }
+
+    if ([bool]$manifest.androidSigning.appBundle.checked -ne $aabSigningChecked) {
+      $failures.Add("RELEASE_MANIFEST.json App Bundle signing checked state mismatch.")
+    }
+
+    if ($aabSigningChecked -and [bool]$manifest.androidSigning.appBundle.debugCertificate -ne [bool]$aabDebugCertificate) {
+      $failures.Add("RELEASE_MANIFEST.json App Bundle debug signing state mismatch.")
+    }
+
+    $actualStoreReady = (
+      $apkSigningChecked -and
+      $aabSigningChecked -and
+      -not [bool]$apkDebugCertificate -and
+      -not [bool]$aabDebugCertificate
+    )
+
+    if ([bool]$manifest.androidSigning.storeReady -ne $actualStoreReady) {
+      $failures.Add("RELEASE_MANIFEST.json storeReady mismatch.")
     }
   }
 }
