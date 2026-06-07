@@ -83,6 +83,13 @@ flutter:
     - assets/logo_light.png
     - assets/launcher_icon_dark.png
     - assets/launcher_icon_light.png
+    - assets/launcher_icon_android_dark.png
+    - assets/launcher_icon_android_light.png
+    - assets/launcher_icon_ios_light.png
+    - assets/launcher_icon_ios_dark_transparent.png
+    - assets/launcher_icon_ios_tinted_grayscale.png
+    - assets/launcher_icon_windows_dark.png
+    - assets/launcher_icon_windows_light.png
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
 
@@ -117,12 +124,16 @@ flutter_launcher_icons:
   android: true
   ios: true
   remove_alpha_ios: true
-  image_path: "assets/launcher_icon.png" 
+  image_path: "assets/launcher_icon_android_dark.png" 
+  image_path_ios: "assets/launcher_icon_ios_light.png"
+  image_path_ios_dark_transparent: "assets/launcher_icon_ios_dark_transparent.png"
+  image_path_ios_tinted_grayscale: "assets/launcher_icon_ios_tinted_grayscale.png"
+  desaturate_tinted_to_grayscale_ios: true
   adaptive_icon_background: "#0A0F1C"
   adaptive_icon_foreground: "assets/android_adaptive_monochrome.png"
   adaptive_icon_foreground_inset: 10
   adaptive_icon_monochrome: "assets/android_adaptive_monochrome.png"
   windows:
     generate: true
-    image_path: "assets/launcher_icon.png"
+    image_path: "assets/launcher_icon_windows_dark.png"
     icon_size: 256
