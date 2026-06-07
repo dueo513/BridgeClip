@@ -53,6 +53,17 @@ Compress-Archive -Path (Join-Path $windowsStage "*") -DestinationPath $windowsZi
 Copy-Item -Force "RELEASE_NOTES.md" (Join-Path $releaseRoot "RELEASE_NOTES.md")
 Copy-Item -Force "RELEASE_AUDIT.md" (Join-Path $releaseRoot "RELEASE_AUDIT.md")
 
+$packagedNotesPath = Join-Path $releaseRoot "RELEASE_NOTES.md"
+$packagedNotes = Get-Content -Encoding UTF8 $packagedNotesPath
+$packagedNotes = $packagedNotes `
+  -replace 'release\\BridgeClip-[^\\`]+\\BridgeClip-Windows-release\.zip',
+    "release\BridgeClip-$ReleaseId\BridgeClip-Windows-release.zip" `
+  -replace 'release\\BridgeClip-[^\\`]+\\BridgeClip-Android-release\.apk',
+    "release\BridgeClip-$ReleaseId\BridgeClip-Android-release.apk" `
+  -replace 'release\\BridgeClip-[^\\`]+\\BridgeClip-Android-release\.aab',
+    "release\BridgeClip-$ReleaseId\BridgeClip-Android-release.aab"
+Set-Content -Encoding UTF8 -Path $packagedNotesPath -Value $packagedNotes
+
 $hashFiles = @(
   "BridgeClip-Android-release.apk",
   "BridgeClip-Android-release.aab",
