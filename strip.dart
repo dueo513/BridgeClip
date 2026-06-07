@@ -1,1 +1,0 @@
-import 'dart:io'; void main() { var bytes = File('lib/main.dart').readAsBytesSync(); var res = <int>[]; for (var b in bytes) { if (b < 128) res.add(b); } File('lib/main.dart').writeAsBytesSync(res); }

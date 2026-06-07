@@ -52,3 +52,15 @@ GoogleService-Info.plist
 *.apk
 *.zip
 lib/secrets.dart
+functions/node_modules/
+
+# Local scratch and emergency backups
+*.bak
+*.bak2
+*.bak3
+*.bak4
+*.bak5
+/build_error*.txt
+/replace.dart
+/strip.dart
+/test_*.dart
