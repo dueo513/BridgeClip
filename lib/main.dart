@@ -31,9 +31,9 @@ import 'services/theme_service.dart';
 import 'state/global_state.dart';
 import 'widgets/app_lock_dialogs.dart';
 import 'widgets/auto_delete_timer_dialog.dart';
-import 'widgets/choice_sheet.dart';
 import 'widgets/clipboard_body.dart';
 import 'widgets/connect_device_sheet.dart';
+import 'widgets/language_menu_button.dart';
 import 'widgets/locked_scaffold.dart';
 import 'widgets/settings_body.dart';
 
@@ -1210,15 +1210,15 @@ class _ClipboardHomeState extends State<ClipboardHome>
   }
 
   Future<void> _showLanguageSheet(AppLang lang) {
-    return _showChoiceSheet<AppLang>(
-      title: LocalizationService.get('language_title'),
-      value: lang,
-      options: const [AppLang.ko, AppLang.en],
-      labelFor: (value) => value == AppLang.ko
-          ? LocalizationService.get('language_ko')
-          : LocalizationService.get('language_en'),
-      iconFor: (_) => Icons.language_rounded,
-      onSelected: LocalizationService.setLanguage,
+    return showLanguageChoiceSheet(
+      context,
+      lang,
+      primaryColor: _primaryColor,
+      surfaceColor: _surfaceColor,
+      softFillColor: _softFillColor,
+      borderColor: _borderColor,
+      textColor: _textColor,
+      mutedTextColor: _mutedTextColor,
     );
   }
 
@@ -1328,38 +1328,6 @@ class _ClipboardHomeState extends State<ClipboardHome>
         onCopyLink: () => _copyConnectionText(link),
       ),
     );
-  }
-
-  Future<void> _showChoiceSheet<T>({
-    required String title,
-    required T value,
-    required List<T> options,
-    required String Function(T value) labelFor,
-    required FutureOr<void> Function(T value) onSelected,
-    IconData Function(T value)? iconFor,
-  }) async {
-    final selected = await showModalBottomSheet<T>(
-      context: context,
-      backgroundColor: Colors.transparent,
-      constraints: const BoxConstraints(maxWidth: 520),
-      builder: (context) => ChoiceSheet<T>(
-        title: title,
-        value: value,
-        options: options,
-        labelFor: labelFor,
-        iconFor: iconFor,
-        primaryColor: _primaryColor,
-        surfaceColor: _surfaceColor,
-        softFillColor: _softFillColor,
-        borderColor: _borderColor,
-        textColor: _textColor,
-        mutedTextColor: _mutedTextColor,
-      ),
-    );
-
-    if (selected != null) {
-      await onSelected(selected);
-    }
   }
 
   Widget _buildSettingsBody(AppLang lang) {

@@ -60,36 +60,54 @@ class LanguageMenuButton extends StatelessWidget {
   }
 
   Future<void> _showLanguageSheet(BuildContext context) async {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-    final isDark = theme.brightness == Brightness.dark;
-    final selected = await showModalBottomSheet<AppLang>(
-      context: context,
-      backgroundColor: Colors.transparent,
-      constraints: const BoxConstraints(maxWidth: 520),
-      builder: (context) => ChoiceSheet<AppLang>(
-        title: LocalizationService.get('language_title'),
-        value: lang,
-        options: const [AppLang.ko, AppLang.en],
-        labelFor: (value) => value == AppLang.ko
-            ? LocalizationService.get('language_ko')
-            : LocalizationService.get('language_en'),
-        iconFor: (_) => Icons.language_rounded,
-        primaryColor: scheme.primary,
-        surfaceColor: scheme.surface,
-        softFillColor: isDark
-            ? Colors.white.withValues(alpha: 0.06)
-            : Colors.black.withValues(alpha: 0.035),
-        borderColor: isDark
-            ? Colors.white.withValues(alpha: 0.08)
-            : Colors.black.withValues(alpha: 0.06),
-        textColor: scheme.onSurface,
-        mutedTextColor: scheme.onSurface.withValues(alpha: 0.56),
-      ),
-    );
+    await showLanguageChoiceSheet(context, lang);
+  }
+}
 
-    if (selected != null) {
-      await LocalizationService.setLanguage(selected);
-    }
+Future<void> showLanguageChoiceSheet(
+  BuildContext context,
+  AppLang lang, {
+  Color? primaryColor,
+  Color? surfaceColor,
+  Color? softFillColor,
+  Color? borderColor,
+  Color? textColor,
+  Color? mutedTextColor,
+}) async {
+  final theme = Theme.of(context);
+  final scheme = theme.colorScheme;
+  final isDark = theme.brightness == Brightness.dark;
+  final selected = await showModalBottomSheet<AppLang>(
+    context: context,
+    backgroundColor: Colors.transparent,
+    constraints: const BoxConstraints(maxWidth: 520),
+    builder: (context) => ChoiceSheet<AppLang>(
+      title: LocalizationService.get('language_title'),
+      value: lang,
+      options: const [AppLang.ko, AppLang.en],
+      labelFor: (value) => value == AppLang.ko
+          ? LocalizationService.get('language_ko')
+          : LocalizationService.get('language_en'),
+      iconFor: (_) => Icons.language_rounded,
+      primaryColor: primaryColor ?? scheme.primary,
+      surfaceColor: surfaceColor ?? scheme.surface,
+      softFillColor:
+          softFillColor ??
+          (isDark
+              ? Colors.white.withValues(alpha: 0.06)
+              : Colors.black.withValues(alpha: 0.035)),
+      borderColor:
+          borderColor ??
+          (isDark
+              ? Colors.white.withValues(alpha: 0.08)
+              : Colors.black.withValues(alpha: 0.06)),
+      textColor: textColor ?? scheme.onSurface,
+      mutedTextColor:
+          mutedTextColor ?? scheme.onSurface.withValues(alpha: 0.56),
+    ),
+  );
+
+  if (selected != null) {
+    await LocalizationService.setLanguage(selected);
   }
 }
