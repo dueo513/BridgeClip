@@ -31,13 +31,12 @@ import 'state/global_state.dart';
 import 'widgets/choice_sheet.dart';
 import 'widgets/clipboard_row.dart';
 import 'widgets/connect_device_sheet.dart';
-import 'widgets/device_row.dart';
+import 'widgets/device_management_body.dart';
 import 'widgets/header_action_button.dart';
 import 'widgets/locked_scaffold.dart';
 import 'widgets/overview_header.dart';
 import 'widgets/pin_field.dart';
 import 'widgets/search_and_filters.dart';
-import 'widgets/settings_check_card.dart';
 import 'widgets/status_pill.dart';
 import 'widgets/top_icon_button.dart';
 
@@ -1919,109 +1918,12 @@ class _ClipboardHomeState extends State<ClipboardHome>
   }
 
   Widget _buildDeviceManagementBody(AppLang lang) {
-    return StreamBuilder<List<DeviceInfo>>(
-      stream: _db.watchDevices(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator(color: _primaryColor));
-        }
-        if (snapshot.hasError) {
-          return Center(
-            child: Text(
-              'Error: ${snapshot.error}',
-              style: TextStyle(color: _textColor),
-            ),
-          );
-        }
-
-        final devices = snapshot.data ?? const <DeviceInfo>[];
-        DeviceInfo? currentDevice;
-        for (final device in devices) {
-          final currentDeviceId = _currentDeviceId;
-          if ((currentDeviceId != null && device.id == currentDeviceId) ||
-              device.isCurrentDevice) {
-            currentDevice = device;
-            break;
-          }
-        }
-
-        return ListView(
-          padding: const EdgeInsets.only(bottom: 16),
-          children: [
-            _buildOverviewHeader(
-              icon: Icons.devices_rounded,
-              title: LocalizationService.get('device_management'),
-              subtitle:
-                  '${LocalizationService.get('room_short_label')} ${_compactRoomId(widget.roomId)}',
-              pills: [
-                _buildStatusPill(
-                  Icons.devices_other_rounded,
-                  LocalizationService.getFormatted('devices_count', [
-                    '${devices.length}',
-                  ]),
-                ),
-                _buildStatusPill(
-                  Icons.cloud_done_rounded,
-                  LocalizationService.get('sync_ready'),
-                  color: Theme.of(context).colorScheme.secondary,
-                ),
-              ],
-              trailing: _buildHeaderActionButton(
-                icon: Icons.qr_code_rounded,
-                label: LocalizationService.get('connect_new_device'),
-                onPressed: _showConnectDeviceSheet,
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-              child: Text(
-                LocalizationService.get('connected_devices'),
-                style: TextStyle(
-                  color: _textColor,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
-                ),
-              ),
-            ),
-            if (devices.isEmpty)
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Text(
-                  LocalizationService.get('empty_devices'),
-                  style: TextStyle(color: _mutedTextColor),
-                ),
-              )
-            else
-              for (final device in devices)
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: _buildDeviceRow(device, lang),
-                ),
-            const SizedBox(height: 12),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: _buildSettingsCheckCard(currentDevice),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  Widget _buildSettingsCheckCard(DeviceInfo? currentDevice) {
-    final deviceId = _currentDeviceId ?? currentDevice?.id;
-    final platform = currentDevice?.platform ?? PlatformService.platformName();
-    final hasPushToken =
-        currentDevice?.token != null && currentDevice!.token!.isNotEmpty;
-    final notificationsOn =
-        currentDevice?.notificationsEnabled ?? _isNotificationEnabled;
-
-    return SettingsCheckCard(
+    return DeviceManagementBody(
       roomId: widget.roomId,
-      deviceId: deviceId,
-      platform: platform,
-      hasPushToken: hasPushToken,
-      notificationsOn: notificationsOn,
+      deviceStream: _db.watchDevices(),
+      lang: lang,
+      currentDeviceId: _currentDeviceId,
+      notificationsEnabled: _isNotificationEnabled,
       appLockEnabled: _isAppLockEnabled,
       launchAtStartupEnabled: _launchAtStartupEnabled,
       primaryColor: _primaryColor,
@@ -2029,21 +1931,10 @@ class _ClipboardHomeState extends State<ClipboardHome>
       borderColor: _borderColor,
       textColor: _textColor,
       mutedTextColor: _mutedTextColor,
-    );
-  }
-
-  Widget _buildDeviceRow(DeviceInfo device, AppLang lang) {
-    return DeviceRow(
-      device: device,
-      lang: lang,
-      primaryColor: _primaryColor,
-      surfaceColor: _surfaceColor,
-      borderColor: _borderColor,
-      textColor: _textColor,
-      mutedTextColor: _mutedTextColor,
-      onRename: _showRenameDeviceDialog,
-      onRemove: () => _removeDevice(device),
-      onNotificationsChanged: (value) async {
+      onConnectDevice: _showConnectDeviceSheet,
+      onRenameCurrentDevice: _showRenameDeviceDialog,
+      onRemoveDevice: _removeDevice,
+      onCurrentDeviceNotificationsChanged: (value) async {
         await _db.setCurrentDeviceNotifications(value);
         final prefs = await SharedPreferences.getInstance();
         await prefs.setBool('isNotificationEnabled', value);
