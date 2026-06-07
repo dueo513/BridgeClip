@@ -4,8 +4,8 @@
 
 Artifacts:
 
-- Windows: `release\BridgeClip-20260608-0134\BridgeClip-Windows-release.zip`
-- Android: `release\BridgeClip-20260608-0134\BridgeClip-Android-release.apk`
+- Windows: `release\BridgeClip-20260608-0240\BridgeClip-Windows-release.zip`
+- Android: `release\BridgeClip-20260608-0240\BridgeClip-Android-release.apk`
 
 ### Included
 
@@ -17,7 +17,7 @@ Artifacts:
 - Windows tray behavior, startup toggle, clipboard monitoring, and echo upload guard.
 - Archive, pinning, search, automatic delete policy, app lock, and light/dark themes.
 - Korean and English localization with Korean UI using `방` / `방 ID`.
-- Theme-aware app logo and Android launcher icon assets.
+- Final launcher icon assets applied for Android, iOS, macOS, and Windows, with platform theme variants prepared.
 - Remote device removal now disconnects the removed device after its registry entry disappears.
 - Windows app window appears in the taskbar; closing the window still hides/minimizes it to tray.
 - Cleaner password hint copy.
@@ -43,6 +43,7 @@ Artifacts:
 - `flutter build windows`: passed.
 - Android APK install on emulator: passed.
 - Android app launch smoke test on emulator: passed.
+- Android launcher icon visual check on emulator: passed.
 - Login screen logo/password hint visual check on emulator: passed.
 - Search field one-character input check on emulator: passed.
 - Firebase CLI available: `15.15.0`.
