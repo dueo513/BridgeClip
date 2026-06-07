@@ -6,6 +6,7 @@ class SearchAndFilters extends StatelessWidget {
   const SearchAndFilters({
     super.key,
     required this.searchController,
+    required this.searchFocusNode,
     required this.searchQuery,
     required this.surfaceColor,
     required this.softFillColor,
@@ -18,6 +19,7 @@ class SearchAndFilters extends StatelessWidget {
   });
 
   final TextEditingController searchController;
+  final FocusNode searchFocusNode;
   final String searchQuery;
   final Color surfaceColor;
   final Color softFillColor;
@@ -38,26 +40,36 @@ class SearchAndFilters extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: borderColor),
       ),
-      child: TextField(
-        controller: searchController,
-        onChanged: onSearchChanged,
-        style: TextStyle(color: textColor),
-        decoration: InputDecoration(
-          prefixIcon: Icon(Icons.search, color: mutedTextColor),
-          hintText: LocalizationService.get('search_clipboards'),
-          hintStyle: TextStyle(color: textColor.withValues(alpha: 0.4)),
-          filled: true,
-          fillColor: softFillColor,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide.none,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: searchFocusNode.requestFocus,
+        child: TextField(
+          controller: searchController,
+          focusNode: searchFocusNode,
+          onTap: searchFocusNode.requestFocus,
+          onChanged: onSearchChanged,
+          keyboardType: TextInputType.text,
+          textInputAction: TextInputAction.search,
+          enableSuggestions: false,
+          autocorrect: false,
+          style: TextStyle(color: textColor),
+          decoration: InputDecoration(
+            prefixIcon: Icon(Icons.search, color: mutedTextColor),
+            hintText: LocalizationService.get('search_clipboards'),
+            hintStyle: TextStyle(color: textColor.withValues(alpha: 0.4)),
+            filled: true,
+            fillColor: softFillColor,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide.none,
+            ),
+            suffixIcon: searchQuery.isEmpty
+                ? null
+                : IconButton(
+                    icon: Icon(Icons.close, color: mutedTextColor),
+                    onPressed: onClearSearch,
+                  ),
           ),
-          suffixIcon: searchQuery.isEmpty
-              ? null
-              : IconButton(
-                  icon: Icon(Icons.close, color: mutedTextColor),
-                  onPressed: onClearSearch,
-                ),
         ),
       ),
     );

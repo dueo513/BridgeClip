@@ -19,7 +19,7 @@ class DesktopShellService {
       const windowOptions = WindowOptions(
         size: Size(800, 600),
         center: true,
-        skipTaskbar: true,
+        skipTaskbar: false,
         titleBarStyle: TitleBarStyle.normal,
         title: 'BridgeClip',
       );

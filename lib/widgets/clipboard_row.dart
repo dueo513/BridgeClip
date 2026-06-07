@@ -54,10 +54,7 @@ class ClipboardRow extends StatelessWidget {
           border: Border.all(color: borderColor),
         ),
         child: ListTile(
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 12,
-          ),
+          contentPadding: const EdgeInsets.fromLTRB(16, 14, 12, 14),
           leading: Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
@@ -66,39 +63,40 @@ class ClipboardRow extends StatelessWidget {
             ),
             child: Icon(_deviceIcon(item.platform), color: primaryColor),
           ),
-          title: Text(
-            item.content,
-            style: TextStyle(
-              color: textColor,
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
+          title: Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: Text(
+              item.content,
+              style: TextStyle(
+                color: textColor,
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                height: 1.32,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
             ),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
           ),
-          subtitle: Padding(
-            padding: const EdgeInsets.only(top: 8),
-            child: Row(
-              children: [
-                Text(
-                  item.deviceName,
-                  style: TextStyle(color: mutedTextColor, fontSize: 12),
+          subtitle: Wrap(
+            spacing: 8,
+            runSpacing: 4,
+            children: [
+              Text(
+                item.deviceName,
+                style: TextStyle(color: mutedTextColor, fontSize: 12),
+              ),
+              Text(
+                item.platform,
+                style: TextStyle(color: mutedTextColor, fontSize: 12),
+              ),
+              Text(
+                timeago.format(
+                  item.timestamp,
+                  locale: lang == AppLang.ko ? 'ko' : 'en',
                 ),
-                const SizedBox(width: 8),
-                Text(
-                  item.platform,
-                  style: TextStyle(color: mutedTextColor, fontSize: 12),
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  timeago.format(
-                    item.timestamp,
-                    locale: lang == AppLang.ko ? 'ko' : 'en',
-                  ),
-                  style: TextStyle(color: mutedTextColor, fontSize: 12),
-                ),
-              ],
-            ),
+                style: TextStyle(color: mutedTextColor, fontSize: 12),
+              ),
+            ],
           ),
           trailing: Row(
             mainAxisSize: MainAxisSize.min,

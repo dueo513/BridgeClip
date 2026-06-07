@@ -268,11 +268,13 @@ class _ClipboardHomeState extends State<ClipboardHome>
 
   final TextEditingController _searchController = TextEditingController();
   final TextEditingController _unlockPinController = TextEditingController();
+  final FocusNode _searchFocusNode = FocusNode();
   final List<String> _optimisticDeletedIds = [];
   final List<int> _appWrittenClipboardSequences = [];
   String _lastCopiedByApp = '';
   Timer? _clipboardBackupTimer;
   StreamSubscription<List<ClipboardItem>>? _desktopSyncSubscription;
+  StreamSubscription<List<DeviceInfo>>? _deviceRegistrySubscription;
   StreamSubscription<Uri>? _linkSubscription;
   String? _currentDeviceId;
   String _currentDeviceName = PlatformService.defaultDeviceName();
@@ -286,6 +288,8 @@ class _ClipboardHomeState extends State<ClipboardHome>
   int _autoDeleteMinutes = 0;
   DateTime? _autoDeleteActivatedAt;
   bool _isWritingClipboardFromApp = false;
+  bool _isLoggingOut = false;
+  bool _hasSeenCurrentDeviceRegistration = false;
 
   Color get _primaryColor => Theme.of(context).colorScheme.primary;
   Color get _surfaceColor => Theme.of(context).colorScheme.surface;
@@ -561,9 +565,24 @@ class _ClipboardHomeState extends State<ClipboardHome>
           notificationsEnabled: notificationsEnabled,
         ),
       );
+      _watchCurrentDeviceRegistration(deviceId);
     } catch (e) {
       debugPrint('Device register failed: $e');
     }
+  }
+
+  void _watchCurrentDeviceRegistration(String deviceId) {
+    _deviceRegistrySubscription?.cancel();
+    _deviceRegistrySubscription = _db.watchDevices().listen((devices) {
+      if (_isLoggingOut) return;
+      final isRegistered = devices.any((device) => device.id == deviceId);
+      if (isRegistered) {
+        _hasSeenCurrentDeviceRegistration = true;
+        return;
+      }
+      if (!_hasSeenCurrentDeviceRegistration) return;
+      _logout(clearDeviceIdentity: true);
+    }, onError: (error) => debugPrint('Device registry watch failed: $error'));
   }
 
   Future<void> _toggleNotification() async {
@@ -786,10 +805,31 @@ class _ClipboardHomeState extends State<ClipboardHome>
     );
   }
 
-  void _logout() async {
+  Future<void> _logout({
+    bool removeCurrentDevice = false,
+    bool clearDeviceIdentity = false,
+  }) async {
+    if (_isLoggingOut) return;
+    _isLoggingOut = true;
+    await _deviceRegistrySubscription?.cancel();
+    _deviceRegistrySubscription = null;
+
+    if (removeCurrentDevice) {
+      final deviceId =
+          _currentDeviceId ?? await DeviceIdentityService.deviceId();
+      try {
+        await _db.deleteDevice(deviceId);
+      } catch (e) {
+        debugPrint('Current device delete failed: $e');
+      }
+    }
+
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('roomId');
     await prefs.remove('roomPassword');
+    if (clearDeviceIdentity) {
+      await DeviceIdentityService.clearDeviceIdentity();
+    }
     CryptoService.instance.clear();
 
     if (!mounted) return;
@@ -799,23 +839,7 @@ class _ClipboardHomeState extends State<ClipboardHome>
   }
 
   Future<void> _removeCurrentDeviceAndLogout() async {
-    final deviceId = _currentDeviceId ?? await DeviceIdentityService.deviceId();
-    try {
-      await _db.deleteDevice(deviceId);
-    } catch (e) {
-      debugPrint('Current device delete failed: $e');
-    }
-
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('roomId');
-    await prefs.remove('roomPassword');
-    await DeviceIdentityService.clearDeviceIdentity();
-    CryptoService.instance.clear();
-
-    if (!mounted) return;
-    Navigator.of(
-      context,
-    ).pushReplacement(MaterialPageRoute(builder: (_) => const LoginScreen()));
+    await _logout(removeCurrentDevice: true, clearDeviceIdentity: true);
   }
 
   void _showRenameDeviceDialog() {
@@ -937,9 +961,11 @@ class _ClipboardHomeState extends State<ClipboardHome>
     WidgetsBinding.instance.removeObserver(this);
     _linkSubscription?.cancel();
     _desktopSyncSubscription?.cancel();
+    _deviceRegistrySubscription?.cancel();
     _clipboardBackupTimer?.cancel();
     _uploadCoordinator.dispose();
     _searchController.dispose();
+    _searchFocusNode.dispose();
     _unlockPinController.dispose();
 
     if (PlatformService.isDesktop) {
@@ -1035,6 +1061,7 @@ class _ClipboardHomeState extends State<ClipboardHome>
       lang: lang,
       isArchiveTab: _isArchiveTab,
       searchController: _searchController,
+      searchFocusNode: _searchFocusNode,
       searchQuery: _searchQuery,
       primaryColor: _primaryColor,
       surfaceColor: _surfaceColor,
@@ -1050,6 +1077,7 @@ class _ClipboardHomeState extends State<ClipboardHome>
       onClearSearch: () {
         _searchController.clear();
         setState(() => _searchQuery = '');
+        _searchFocusNode.requestFocus();
       },
       onCopy: (item) => _copyToLocalClipboard(item.content),
       onTogglePin: (item) => _db.togglePin(item.id, item.isPinned),

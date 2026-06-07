@@ -16,6 +16,7 @@ class ClipboardBody extends StatelessWidget {
     required this.lang,
     required this.isArchiveTab,
     required this.searchController,
+    required this.searchFocusNode,
     required this.searchQuery,
     required this.primaryColor,
     required this.surfaceColor,
@@ -37,6 +38,7 @@ class ClipboardBody extends StatelessWidget {
   final AppLang lang;
   final bool isArchiveTab;
   final TextEditingController searchController;
+  final FocusNode searchFocusNode;
   final String searchQuery;
   final Color primaryColor;
   final Color surfaceColor;
@@ -145,6 +147,7 @@ class ClipboardBody extends StatelessWidget {
   Widget _searchAndFilters(List<ClipboardItem> visibleItems) {
     return SearchAndFilters(
       searchController: searchController,
+      searchFocusNode: searchFocusNode,
       searchQuery: searchQuery,
       surfaceColor: surfaceColor,
       softFillColor: softFillColor,

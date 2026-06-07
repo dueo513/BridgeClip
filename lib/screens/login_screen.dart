@@ -216,23 +216,13 @@ class _LoginScreenState extends State<LoginScreen> {
                       constraints: const BoxConstraints(maxWidth: 520),
                       child: Column(
                         children: [
-                          Container(
-                            width: 96,
-                            height: 96,
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: scheme.primary.withValues(alpha: 0.12),
-                              borderRadius: BorderRadius.circular(24),
-                              border: Border.all(
-                                color: scheme.primary.withValues(alpha: 0.16),
-                              ),
-                            ),
-                            child: Image.asset(
-                              isDark
-                                  ? 'assets/logo_dark.png'
-                                  : 'assets/logo_light.png',
-                              fit: BoxFit.contain,
-                            ),
+                          Image.asset(
+                            isDark
+                                ? 'assets/logo_dark.png'
+                                : 'assets/logo_light.png',
+                            width: 112,
+                            height: 112,
+                            fit: BoxFit.contain,
                           ),
                           const SizedBox(height: 26),
                           Text(

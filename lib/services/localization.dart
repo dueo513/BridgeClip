@@ -89,7 +89,7 @@ class LocalizationService {
     'room_id_label': '방 ID',
     'room_id_hint': '예: my_secret_room',
     'password_label': '보안 비밀번호',
-    'password_hint': '종단간 암호화(E2EE)에 사용됩니다.',
+    'password_hint': '같은 방에 연결할 때 사용할 비밀번호',
     'btn_start_sync': '동기화 시작',
     'login_info': '다른 기기에서도 같은 정보를 입력하면 동기화됩니다.',
 
@@ -260,7 +260,7 @@ class LocalizationService {
     'room_id_label': 'Room ID',
     'room_id_hint': 'e.g. my_secret_room',
     'password_label': 'Security password',
-    'password_hint': 'Used for end-to-end encryption (E2EE)',
+    'password_hint': 'Password for this room',
     'btn_start_sync': 'Start syncing',
     'login_info': 'Use the same credentials on other devices to sync.',
 
