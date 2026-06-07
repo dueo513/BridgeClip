@@ -65,6 +65,7 @@ $requiredFiles = @(
   "BridgeClip-Windows-release\clipboard_sync.exe",
   "RELEASE_NOTES.md",
   "RELEASE_AUDIT.md",
+  "RELEASE_MANIFEST.json",
   "SHA256SUMS.txt"
 )
 
@@ -97,6 +98,54 @@ if ($failures.Count -eq 0) {
     $actualLength = (Get-Item $path).Length
     if ($actualHash -ne $parts[0] -or $actualLength -ne [int64]$parts[1]) {
       $failures.Add("Hash or size mismatch: $($parts[2])")
+    }
+  }
+}
+
+if ($failures.Count -eq 0) {
+  $manifestPath = Join-Path $releaseRoot "RELEASE_MANIFEST.json"
+  try {
+    $manifest = Get-Content -Encoding UTF8 $manifestPath -Raw | ConvertFrom-Json
+  } catch {
+    $failures.Add("RELEASE_MANIFEST.json is not valid JSON.")
+    $manifest = $null
+  }
+
+  if ($null -ne $manifest) {
+    if ($manifest.name -ne "BridgeClip") {
+      $failures.Add("RELEASE_MANIFEST.json has unexpected name: $($manifest.name)")
+    }
+
+    if ($manifest.releaseId -ne $releaseId) {
+      $failures.Add("RELEASE_MANIFEST.json releaseId mismatch: $($manifest.releaseId)")
+    }
+
+    $expectedReleasePath = "release\$releaseName"
+    if ($manifest.releasePath -ne $expectedReleasePath) {
+      $failures.Add("RELEASE_MANIFEST.json releasePath mismatch: $($manifest.releasePath)")
+    }
+
+    $expectedManifestFiles = @(
+      "BridgeClip-Android-release.apk",
+      "BridgeClip-Android-release.aab",
+      "BridgeClip-Windows-release.zip",
+      "RELEASE_NOTES.md",
+      "RELEASE_AUDIT.md"
+    )
+
+    foreach ($expectedFile in $expectedManifestFiles) {
+      $entry = $manifest.artifacts | Where-Object { $_.file -eq $expectedFile } | Select-Object -First 1
+      if ($null -eq $entry) {
+        $failures.Add("RELEASE_MANIFEST.json missing artifact: $expectedFile")
+        continue
+      }
+
+      $artifactPath = Join-Path $releaseRoot $expectedFile
+      $actualHash = (Get-FileHash $artifactPath -Algorithm SHA256).Hash
+      $actualLength = (Get-Item $artifactPath).Length
+      if ($entry.sha256 -ne $actualHash -or [int64]$entry.size -ne $actualLength) {
+        $failures.Add("RELEASE_MANIFEST.json hash or size mismatch: $expectedFile")
+      }
     }
   }
 }

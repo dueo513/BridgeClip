@@ -93,6 +93,36 @@ $hashFiles = @(
   "RELEASE_AUDIT.md"
 )
 
+$manifestArtifacts = foreach ($file in $hashFiles) {
+  $path = Join-Path $releaseRoot $file
+  [ordered]@{
+    file = $file
+    sha256 = (Get-FileHash $path -Algorithm SHA256).Hash
+    size = (Get-Item $path).Length
+  }
+}
+
+$gitCommit = $null
+try {
+  $gitCommit = (& git rev-parse HEAD 2>$null).Trim()
+} catch {
+  $gitCommit = $null
+}
+
+$manifest = [ordered]@{
+  name = "BridgeClip"
+  releaseId = $ReleaseId
+  releasePath = "release\BridgeClip-$ReleaseId"
+  generatedAtUtc = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
+  gitCommit = $gitCommit
+  artifacts = $manifestArtifacts
+}
+
+$manifestPath = Join-Path $releaseRoot "RELEASE_MANIFEST.json"
+$manifest | ConvertTo-Json -Depth 5 | Set-Content -Encoding UTF8 -Path $manifestPath
+
+$hashFiles += "RELEASE_MANIFEST.json"
+
 $hashLines = foreach ($file in $hashFiles) {
   $path = Join-Path $releaseRoot $file
   $hash = (Get-FileHash $path -Algorithm SHA256).Hash

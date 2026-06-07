@@ -4,9 +4,9 @@
 
 Artifacts:
 
-- Windows: `release\BridgeClip-20260608-0352\BridgeClip-Windows-release.zip`
-- Android APK: `release\BridgeClip-20260608-0352\BridgeClip-Android-release.apk`
-- Android App Bundle: `release\BridgeClip-20260608-0352\BridgeClip-Android-release.aab`
+- Windows: `release\BridgeClip-20260608-0358\BridgeClip-Windows-release.zip`
+- Android APK: `release\BridgeClip-20260608-0358\BridgeClip-Android-release.apk`
+- Android App Bundle: `release\BridgeClip-20260608-0358\BridgeClip-Android-release.aab`
 
 ### Included
 
@@ -55,6 +55,7 @@ Artifacts:
 - `tools\package_release.ps1` writes `release\LATEST.txt` after successful packaging.
 - `tools\package_release.ps1` restores the previous `release\LATEST.txt` if automatic verification fails.
 - `tools\verify_release.ps1` checks that `release\LATEST.txt` matches the verified release.
+- Release packages include `RELEASE_MANIFEST.json` with artifact hashes, sizes, and source commit.
 - `tools\verify_release.ps1` release verification: passed with debug-signing warnings for APK and AAB.
 - `tools\verify_release.ps1` can infer the latest official release folder when `-ReleasePath` is omitted.
 - `tools\verify_release.ps1 -RequireStoreSigning` is available as the final APK/AAB store-submission signing gate.
