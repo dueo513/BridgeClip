@@ -27,8 +27,11 @@ Release folder:
 - `flutter build windows` passed.
 - Firebase deploy passed for `firestore:rules,functions` on project `shrud-clip-2026-78fee`.
 - Android release APK installed on emulator.
+- Android release APK launched on emulator and showed the main BridgeClip screen.
 - Android launcher icon was visually checked on emulator.
 - Windows release zip contains `clipboard_sync.exe` and `flutter_windows.dll`.
+- Windows release `clipboard_sync.exe` started successfully from the release folder and was stopped after the smoke check.
+- `SHA256SUMS.txt` entries match the current release artifact hashes and file sizes.
 - Service account files and `googleapis_auth` are not present in client dependencies or source; only README guidance mentions not shipping service-account credentials.
 
 ## Feature Preservation Evidence

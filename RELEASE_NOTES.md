@@ -46,7 +46,10 @@ Artifacts:
 - `firebase.cmd deploy --only firestore:rules,functions --project shrud-clip-2026-78fee`: passed.
 - Android APK install on emulator: passed.
 - Android app launch smoke test on emulator: passed.
+- Android release APK launch smoke test on emulator: passed.
 - Android launcher icon visual check on emulator: passed.
+- Windows release executable smoke test: passed.
+- Release artifact SHA-256 verification: passed.
 - Login screen logo/password hint visual check on emulator: passed.
 - Search field one-character input check on emulator: passed.
 - Firebase CLI available: `15.15.0`.
