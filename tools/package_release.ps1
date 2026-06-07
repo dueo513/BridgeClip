@@ -2,7 +2,8 @@ param(
   [string]$ReleaseId = (Get-Date -Format "yyyyMMdd-HHmm"),
   [switch]$Build,
   [switch]$RequireStoreSigning,
-  [switch]$SkipVerify
+  [switch]$SkipVerify,
+  [switch]$KeepFailedPackage
 )
 
 $ErrorActionPreference = "Stop"
@@ -14,6 +15,7 @@ $flutter = "C:\Users\shrud\.gemini\antigravity\scratch\flutter\bin\flutter.bat"
 $releaseRoot = Join-Path $repoRoot "release\BridgeClip-$ReleaseId"
 $windowsStage = Join-Path $releaseRoot "BridgeClip-Windows-release"
 $windowsZip = Join-Path $releaseRoot "BridgeClip-Windows-release.zip"
+$releaseExistedBefore = Test-Path $releaseRoot
 
 function Update-PackagedReleasePaths {
   param(
@@ -131,6 +133,19 @@ if (-not $SkipVerify) {
 
   & powershell @verifyArgs
   if ($LASTEXITCODE -ne 0) {
+    if ((-not $releaseExistedBefore) -and (-not $KeepFailedPackage) -and (Test-Path $releaseRoot)) {
+      $resolvedReleaseRoot = (Resolve-Path $releaseRoot).Path
+      $resolvedReleaseParent = (Resolve-Path (Join-Path $repoRoot "release")).Path
+      $releaseParentPrefix = $resolvedReleaseParent + [System.IO.Path]::DirectorySeparatorChar
+
+      if ($resolvedReleaseRoot.StartsWith($releaseParentPrefix, [System.StringComparison]::OrdinalIgnoreCase)) {
+        Remove-Item -Recurse -Force -LiteralPath $resolvedReleaseRoot
+        Write-Host "Removed failed release package: $resolvedReleaseRoot"
+      } else {
+        Write-Warning "Skipped failed release cleanup because the path is outside the release folder: $resolvedReleaseRoot"
+      }
+    }
+
     throw "Release verification failed after packaging."
   }
 }

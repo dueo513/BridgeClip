@@ -6,7 +6,7 @@ Goal: optimize code without removing or changing intended app features, then pro
 
 Release folder:
 
-- `release\BridgeClip-20260608-0341`
+- `release\BridgeClip-20260608-0342`
 
 ## Release Artifacts
 
@@ -33,8 +33,9 @@ Release folder:
 - Windows release `clipboard_sync.exe` started successfully from the release folder and was stopped after the smoke check.
 - `SHA256SUMS.txt` entries match the current release artifact hashes and file sizes.
 - `tools\package_release.ps1` packaged APK, AAB, Windows zip, release documents, SHA-256 sums, and automatic release verification successfully in a script smoke check.
+- `tools\package_release.ps1` removes newly created packages when automatic release verification fails unless `-KeepFailedPackage` is passed.
 - `tools\package_release.ps1` rewrites packaged `RELEASE_NOTES.md` artifact paths and `RELEASE_AUDIT.md` release folder references to the current `ReleaseId`.
-- `tools\verify_release.ps1` passed for `release\BridgeClip-20260608-0341`, including required artifact checks, SHA-256 verification, Windows zip content checks, and APK/AAB signature verification.
+- `tools\verify_release.ps1` passed for `release\BridgeClip-20260608-0342`, including required artifact checks, SHA-256 verification, Windows zip content checks, and APK/AAB signature verification.
 - `tools\verify_release.ps1` can infer the latest official `BridgeClip-YYYYMMDD-HHMM` release folder when `-ReleasePath` is omitted.
 - `tools\verify_release.ps1 -RequireStoreSigning` is available to fail store-submission verification when the APK or AAB is still debug-signed.
 - Service account files and `googleapis_auth` are not present in client dependencies or source; only README guidance mentions not shipping service-account credentials.

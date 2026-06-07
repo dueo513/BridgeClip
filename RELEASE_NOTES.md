@@ -4,9 +4,9 @@
 
 Artifacts:
 
-- Windows: `release\BridgeClip-20260608-0341\BridgeClip-Windows-release.zip`
-- Android APK: `release\BridgeClip-20260608-0341\BridgeClip-Android-release.apk`
-- Android App Bundle: `release\BridgeClip-20260608-0341\BridgeClip-Android-release.aab`
+- Windows: `release\BridgeClip-20260608-0342\BridgeClip-Windows-release.zip`
+- Android APK: `release\BridgeClip-20260608-0342\BridgeClip-Android-release.apk`
+- Android App Bundle: `release\BridgeClip-20260608-0342\BridgeClip-Android-release.aab`
 
 ### Included
 
@@ -51,6 +51,7 @@ Artifacts:
 - Windows release executable smoke test: passed.
 - Release artifact SHA-256 verification: passed.
 - `tools\package_release.ps1` release packaging smoke test: passed, including automatic release verification.
+- `tools\package_release.ps1` removes newly created packages when automatic verification fails unless `-KeepFailedPackage` is passed.
 - `tools\verify_release.ps1` release verification: passed with debug-signing warnings for APK and AAB.
 - `tools\verify_release.ps1` can infer the latest official release folder when `-ReleasePath` is omitted.
 - `tools\verify_release.ps1 -RequireStoreSigning` is available as the final APK/AAB store-submission signing gate.
