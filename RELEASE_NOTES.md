@@ -4,9 +4,9 @@
 
 Artifacts:
 
-- Windows: `release\BridgeClip-20260608-0358\BridgeClip-Windows-release.zip`
-- Android APK: `release\BridgeClip-20260608-0358\BridgeClip-Android-release.apk`
-- Android App Bundle: `release\BridgeClip-20260608-0358\BridgeClip-Android-release.aab`
+- Windows: `release\BridgeClip-20260608-0401\BridgeClip-Windows-release.zip`
+- Android APK: `release\BridgeClip-20260608-0401\BridgeClip-Android-release.apk`
+- Android App Bundle: `release\BridgeClip-20260608-0401\BridgeClip-Android-release.aab`
 
 ### Included
 
