@@ -13,9 +13,9 @@ and iOS are planned as a later Apple platform phase.
 - Backend: Firebase Auth, Firestore, Cloud Functions, FCM
 - Encryption: AES-256-GCM with a PBKDF2-derived key
 - Latest validated artifacts:
-  - `release\BridgeClip-20260608-0337\BridgeClip-Windows-release.zip`
-  - `release\BridgeClip-20260608-0337\BridgeClip-Android-release.apk`
-  - `release\BridgeClip-20260608-0337\BridgeClip-Android-release.aab`
+  - `release\BridgeClip-20260608-0341\BridgeClip-Windows-release.zip`
+  - `release\BridgeClip-20260608-0341\BridgeClip-Android-release.apk`
+  - `release\BridgeClip-20260608-0341\BridgeClip-Android-release.aab`
 
 ## Features
 
@@ -179,16 +179,16 @@ After creating the keystore, rebuild and verify the release package:
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File tools\package_release.ps1 -Build
-powershell -NoProfile -ExecutionPolicy Bypass -File tools\verify_release.ps1
 ```
 
-When `-ReleasePath` is omitted, the verifier uses the newest official
-`release\BridgeClip-YYYYMMDD-HHMM` folder.
+`tools\package_release.ps1` runs `tools\verify_release.ps1` after packaging
+unless `-SkipVerify` is passed. When `-ReleasePath` is omitted, the verifier
+uses the newest official `release\BridgeClip-YYYYMMDD-HHMM` folder.
 
 For a store-submission gate, require non-debug Android APK and App Bundle signers:
 
 ```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File tools\verify_release.ps1 -RequireStoreSigning
+powershell -NoProfile -ExecutionPolicy Bypass -File tools\package_release.ps1 -Build -RequireStoreSigning
 ```
 
 ## Release Checklist
@@ -203,10 +203,9 @@ Before sharing a build:
 - Build Windows release.
 - Build Android release APK.
 - Build Android release App Bundle.
-- Package artifacts with `tools\package_release.ps1`.
-- Verify packaged artifacts with `tools\verify_release.ps1`.
+- Package and verify artifacts with `tools\package_release.ps1`.
 - For store submission, verify packaged artifacts and Android APK/AAB signing with
-  `tools\verify_release.ps1 -RequireStoreSigning`.
+  `tools\package_release.ps1 -RequireStoreSigning`.
 - Install and launch the APK.
 - Launch the Windows app.
 - Verify host Windows clipboard upload.

@@ -1,6 +1,8 @@
 param(
   [string]$ReleaseId = (Get-Date -Format "yyyyMMdd-HHmm"),
-  [switch]$Build
+  [switch]$Build,
+  [switch]$RequireStoreSigning,
+  [switch]$SkipVerify
 )
 
 $ErrorActionPreference = "Stop"
@@ -110,3 +112,25 @@ if (-not (Test-Path (Join-Path $windowsStage "clipboard_sync.exe"))) {
 
 Write-Host "Release packaged: $releaseRoot"
 Write-Host "SHA-256 verification: $hashOk"
+
+if (-not $SkipVerify) {
+  $verifyScript = Join-Path $PSScriptRoot "verify_release.ps1"
+  $verifyArgs = @(
+    "-NoProfile",
+    "-ExecutionPolicy",
+    "Bypass",
+    "-File",
+    $verifyScript,
+    "-ReleasePath",
+    $releaseRoot
+  )
+
+  if ($RequireStoreSigning) {
+    $verifyArgs += "-RequireStoreSigning"
+  }
+
+  & powershell @verifyArgs
+  if ($LASTEXITCODE -ne 0) {
+    throw "Release verification failed after packaging."
+  }
+}

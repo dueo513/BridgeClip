@@ -4,9 +4,9 @@
 
 Artifacts:
 
-- Windows: `release\BridgeClip-20260608-0337\BridgeClip-Windows-release.zip`
-- Android APK: `release\BridgeClip-20260608-0337\BridgeClip-Android-release.apk`
-- Android App Bundle: `release\BridgeClip-20260608-0337\BridgeClip-Android-release.aab`
+- Windows: `release\BridgeClip-20260608-0341\BridgeClip-Windows-release.zip`
+- Android APK: `release\BridgeClip-20260608-0341\BridgeClip-Android-release.apk`
+- Android App Bundle: `release\BridgeClip-20260608-0341\BridgeClip-Android-release.aab`
 
 ### Included
 
@@ -50,7 +50,7 @@ Artifacts:
 - Android launcher icon visual check on emulator: passed.
 - Windows release executable smoke test: passed.
 - Release artifact SHA-256 verification: passed.
-- `tools\package_release.ps1` release packaging smoke test: passed.
+- `tools\package_release.ps1` release packaging smoke test: passed, including automatic release verification.
 - `tools\verify_release.ps1` release verification: passed with debug-signing warnings for APK and AAB.
 - `tools\verify_release.ps1` can infer the latest official release folder when `-ReleasePath` is omitted.
 - `tools\verify_release.ps1 -RequireStoreSigning` is available as the final APK/AAB store-submission signing gate.
@@ -74,7 +74,7 @@ firebase.cmd deploy --only firestore:rules,functions --project shrud-clip-2026-7
 - Android notification select-copy action on a physical phone.
 - Android Quick Settings tile on a physical phone.
 - Phone reboot and app relaunch persistence.
-- Generate and back up a private upload/release keystore, then rebuild the APK/AAB and run `tools\verify_release.ps1 -RequireStoreSigning`.
+- Generate and back up a private upload/release keystore, then rebuild the APK/AAB with `tools\package_release.ps1 -Build -RequireStoreSigning`.
 
 ### Known Constraints
 
