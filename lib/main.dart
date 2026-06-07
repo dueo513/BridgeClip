@@ -1050,8 +1050,8 @@ class _ClipboardHomeState extends State<ClipboardHome>
               padding: EdgeInsets.zero,
               children: [
                 Container(
-                  height: 214,
-                  padding: const EdgeInsets.fromLTRB(20, 22, 20, 18),
+                  height: 164,
+                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       begin: Alignment.topLeft,
@@ -1067,49 +1067,32 @@ class _ClipboardHomeState extends State<ClipboardHome>
                     children: [
                       Row(
                         children: [
-                          Container(
-                            width: 48,
-                            height: 48,
-                            decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.18),
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(
-                                color: Colors.white.withValues(alpha: 0.18),
-                              ),
-                            ),
-                            child: const Icon(
-                              Icons.content_paste_go_rounded,
-                              color: Colors.white,
-                              size: 27,
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: Image.asset(
+                              'assets/logo.png',
+                              width: 42,
+                              height: 42,
+                              fit: BoxFit.cover,
                             ),
                           ),
-                          const Spacer(),
-                          Container(
-                            width: 38,
-                            height: 38,
-                            decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.13),
-                              borderRadius: BorderRadius.circular(13),
-                            ),
-                            child: const Icon(
-                              Icons.hub_rounded,
-                              color: Colors.white,
-                              size: 21,
+                          const SizedBox(width: 12),
+                          const Expanded(
+                            child: Text(
+                              'BridgeClip',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 25,
+                                height: 1.05,
+                                fontWeight: FontWeight.w900,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
                         ],
                       ),
                       const Spacer(),
-                      const Text(
-                        'BridgeClip',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 27,
-                          height: 1.05,
-                          fontWeight: FontWeight.w900,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
                       Wrap(
                         spacing: 8,
                         runSpacing: 8,
