@@ -1099,15 +1099,16 @@ class _ClipboardHomeState extends State<ClipboardHome>
                             ],
                           ),
                           const Spacer(),
-                          Wrap(
-                            spacing: 8,
-                            runSpacing: 8,
+                          Row(
                             children: [
-                              _drawerHeaderChip(
-                                icon: Icons.meeting_room_rounded,
-                                text:
-                                    '${LocalizationService.get('room_short_label')} ${_compactRoomId(widget.roomId)}',
+                              Expanded(
+                                child: _drawerHeaderChip(
+                                  icon: Icons.meeting_room_rounded,
+                                  text:
+                                      '${LocalizationService.get('room_short_label')} ${widget.roomId}',
+                                ),
                               ),
+                              const SizedBox(width: 8),
                               _drawerHeaderChip(
                                 icon: Icons.check_circle_rounded,
                                 text: LocalizationService.get('sync_ready'),
@@ -1335,11 +1336,6 @@ class _ClipboardHomeState extends State<ClipboardHome>
       onTogglePin: (item) => _db.togglePin(item.id, item.isPinned),
       onDelete: _deleteItem,
     );
-  }
-
-  String _compactRoomId(String roomId) {
-    if (roomId.length <= 18) return roomId;
-    return '${roomId.substring(0, 11)}...${roomId.substring(roomId.length - 4)}';
   }
 
   String _joinLink() {
