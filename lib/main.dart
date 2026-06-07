@@ -41,6 +41,8 @@ import 'widgets/top_icon_button.dart';
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();
 
+const int _clipboardNotificationId = 1001;
+
 @pragma('vm:entry-point')
 void notificationTapBackground(NotificationResponse response) async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -101,8 +103,9 @@ Future<void> _showLocalNotification(RemoteMessage message) async {
     ],
   );
 
+  await flutterLocalNotificationsPlugin.cancel(id: _clipboardNotificationId);
   await flutterLocalNotificationsPlugin.show(
-    id: DateTime.now().millisecondsSinceEpoch.remainder(100000),
+    id: _clipboardNotificationId,
     title: title,
     body: body,
     notificationDetails: const NotificationDetails(android: androidDetails),

@@ -110,7 +110,7 @@ class ClipboardBody extends StatelessWidget {
                 StatusPill(
                   icon: Icons.layers_rounded,
                   label: LocalizationService.get('status_items'),
-                  text: LocalizationService.getFormatted('items_count', [
+                  text: LocalizationService.getFormatted('items_count_short', [
                     '${items.length}',
                   ]),
                   primaryColor: primaryColor,
