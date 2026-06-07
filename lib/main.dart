@@ -37,7 +37,6 @@ import 'widgets/connect_device_sheet.dart';
 import 'widgets/device_management_body.dart';
 import 'widgets/locked_scaffold.dart';
 import 'widgets/settings_body.dart';
-import 'widgets/top_icon_button.dart';
 
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();
@@ -1047,23 +1046,7 @@ class _ClipboardHomeState extends State<ClipboardHome>
         }
 
         return Scaffold(
-          appBar: AppBar(
-            centerTitle: true,
-            actions: [
-              _buildTopIconButton(
-                tooltip: LocalizationService.get('settings'),
-                icon: Icons.tune_rounded,
-                active: _isSettingsTab,
-                onPressed: () {
-                  setState(() {
-                    _isArchiveTab = false;
-                    _isDeviceManagementTab = false;
-                    _isSettingsTab = true;
-                  });
-                },
-              ),
-            ],
-          ),
+          appBar: AppBar(centerTitle: true),
           drawer: Drawer(
             child: ListView(
               padding: EdgeInsets.zero,
@@ -1285,26 +1268,6 @@ class _ClipboardHomeState extends State<ClipboardHome>
               : _buildClipboardBody(lang),
         );
       },
-    );
-  }
-
-  Widget _buildTopIconButton({
-    required IconData icon,
-    required String tooltip,
-    required VoidCallback onPressed,
-    bool active = false,
-    bool danger = false,
-  }) {
-    return TopIconButton(
-      icon: icon,
-      tooltip: tooltip,
-      onPressed: onPressed,
-      primaryColor: _primaryColor,
-      mutedTextColor: _mutedTextColor,
-      softFillColor: _softFillColor,
-      borderColor: _borderColor,
-      active: active,
-      danger: danger,
     );
   }
 
