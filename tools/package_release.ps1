@@ -13,6 +13,25 @@ $releaseRoot = Join-Path $repoRoot "release\BridgeClip-$ReleaseId"
 $windowsStage = Join-Path $releaseRoot "BridgeClip-Windows-release"
 $windowsZip = Join-Path $releaseRoot "BridgeClip-Windows-release.zip"
 
+function Update-PackagedReleasePaths {
+  param(
+    [string]$Path,
+    [string]$ReleaseId
+  )
+
+  $content = Get-Content -Encoding UTF8 $Path
+  $content = $content `
+    -replace 'release\\BridgeClip-[^\\`]+\\BridgeClip-Windows-release\.zip',
+      "release\BridgeClip-$ReleaseId\BridgeClip-Windows-release.zip" `
+    -replace 'release\\BridgeClip-[^\\`]+\\BridgeClip-Android-release\.apk',
+      "release\BridgeClip-$ReleaseId\BridgeClip-Android-release.apk" `
+    -replace 'release\\BridgeClip-[^\\`]+\\BridgeClip-Android-release\.aab',
+      "release\BridgeClip-$ReleaseId\BridgeClip-Android-release.aab" `
+    -replace 'release\\BridgeClip-[^\\`]+',
+      "release\BridgeClip-$ReleaseId"
+  Set-Content -Encoding UTF8 -Path $Path -Value $content
+}
+
 if ($Build) {
   & $flutter build apk --release
   & $flutter build appbundle --release
@@ -53,16 +72,8 @@ Compress-Archive -Path (Join-Path $windowsStage "*") -DestinationPath $windowsZi
 Copy-Item -Force "RELEASE_NOTES.md" (Join-Path $releaseRoot "RELEASE_NOTES.md")
 Copy-Item -Force "RELEASE_AUDIT.md" (Join-Path $releaseRoot "RELEASE_AUDIT.md")
 
-$packagedNotesPath = Join-Path $releaseRoot "RELEASE_NOTES.md"
-$packagedNotes = Get-Content -Encoding UTF8 $packagedNotesPath
-$packagedNotes = $packagedNotes `
-  -replace 'release\\BridgeClip-[^\\`]+\\BridgeClip-Windows-release\.zip',
-    "release\BridgeClip-$ReleaseId\BridgeClip-Windows-release.zip" `
-  -replace 'release\\BridgeClip-[^\\`]+\\BridgeClip-Android-release\.apk',
-    "release\BridgeClip-$ReleaseId\BridgeClip-Android-release.apk" `
-  -replace 'release\\BridgeClip-[^\\`]+\\BridgeClip-Android-release\.aab',
-    "release\BridgeClip-$ReleaseId\BridgeClip-Android-release.aab"
-Set-Content -Encoding UTF8 -Path $packagedNotesPath -Value $packagedNotes
+Update-PackagedReleasePaths -Path (Join-Path $releaseRoot "RELEASE_NOTES.md") -ReleaseId $ReleaseId
+Update-PackagedReleasePaths -Path (Join-Path $releaseRoot "RELEASE_AUDIT.md") -ReleaseId $ReleaseId
 
 $hashFiles = @(
   "BridgeClip-Android-release.apk",
