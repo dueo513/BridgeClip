@@ -33,6 +33,7 @@ Release folder:
 - Windows release `clipboard_sync.exe` started successfully from the release folder and was stopped after the smoke check.
 - `SHA256SUMS.txt` entries match the current release artifact hashes and file sizes.
 - Service account files and `googleapis_auth` are not present in client dependencies or source; only README guidance mentions not shipping service-account credentials.
+- Android release signing is configurable through `android/key.properties`; without that local file, Gradle falls back to the debug signing key for testable local release builds.
 
 ## Feature Preservation Evidence
 
@@ -49,6 +50,7 @@ These are not fully provable on the emulator/host setup and should be checked on
 - Android notification `select copy` action.
 - Android Quick Settings tile.
 - Phone reboot and app relaunch persistence.
+- Android Play submission signing with a private upload/release keystore.
 
 ## Status
 

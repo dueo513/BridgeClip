@@ -52,6 +52,7 @@ Artifacts:
 - Release artifact SHA-256 verification: passed.
 - Login screen logo/password hint visual check on emulator: passed.
 - Search field one-character input check on emulator: passed.
+- Android release signing config supports `android/key.properties`; current local package uses debug-key fallback because no private release key is present.
 - Firebase CLI available: `15.15.0`.
 - Firebase project selected: `shrud-clip-2026-78fee`.
 
@@ -68,6 +69,7 @@ firebase.cmd deploy --only firestore:rules,functions --project shrud-clip-2026-7
 - Android notification select-copy action on a physical phone.
 - Android Quick Settings tile on a physical phone.
 - Phone reboot and app relaunch persistence.
+- Play submission signing with a private upload/release keystore.
 
 ### Known Constraints
 
