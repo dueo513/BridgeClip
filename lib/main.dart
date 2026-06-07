@@ -1477,7 +1477,6 @@ class _ClipboardHomeState extends State<ClipboardHome>
       launchAtStartupEnabled: _launchAtStartupEnabled,
       primaryColor: _primaryColor,
       surfaceColor: _surfaceColor,
-      softFillColor: _softFillColor,
       borderColor: _borderColor,
       textColor: _textColor,
       mutedTextColor: _mutedTextColor,

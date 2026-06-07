@@ -6,10 +6,7 @@ import '../models/device_info.dart';
 import '../services/localization.dart';
 import '../services/platform_service.dart';
 import '../services/theme_service.dart';
-import 'header_action_button.dart';
-import 'overview_header.dart';
 import 'settings_check_card.dart';
-import 'status_pill.dart';
 
 class SettingsBody extends StatelessWidget {
   const SettingsBody({
@@ -24,7 +21,6 @@ class SettingsBody extends StatelessWidget {
     required this.launchAtStartupEnabled,
     required this.primaryColor,
     required this.surfaceColor,
-    required this.softFillColor,
     required this.borderColor,
     required this.textColor,
     required this.mutedTextColor,
@@ -49,7 +45,6 @@ class SettingsBody extends StatelessWidget {
   final bool? launchAtStartupEnabled;
   final Color primaryColor;
   final Color surfaceColor;
-  final Color softFillColor;
   final Color borderColor;
   final Color textColor;
   final Color mutedTextColor;
@@ -80,49 +75,7 @@ class SettingsBody extends StatelessWidget {
         return ListView(
           padding: const EdgeInsets.only(bottom: 18),
           children: [
-            OverviewHeader(
-              icon: Icons.tune_rounded,
-              title: LocalizationService.get('settings'),
-              subtitle:
-                  '${LocalizationService.get('room_short_label')} ${_compactRoomId(roomId)}',
-              pillsLabel: LocalizationService.get('status_summary'),
-              pills: [
-                StatusPill(
-                  icon: AppThemeService.isDark
-                      ? Icons.dark_mode_rounded
-                      : Icons.light_mode_rounded,
-                  label: LocalizationService.get('settings_theme'),
-                  text: AppThemeService.isDark
-                      ? LocalizationService.get('theme_dark')
-                      : LocalizationService.get('theme_light'),
-                  primaryColor: primaryColor,
-                  textColor: textColor,
-                ),
-                StatusPill(
-                  icon: notificationsOn
-                      ? Icons.notifications_active_rounded
-                      : Icons.notifications_off_rounded,
-                  label: LocalizationService.get('status_notifications'),
-                  text: notificationsOn
-                      ? LocalizationService.get('status_on')
-                      : LocalizationService.get('status_off'),
-                  primaryColor: primaryColor,
-                  textColor: textColor,
-                  color: notificationsOn ? Colors.green : Colors.orange,
-                ),
-              ],
-              primaryColor: primaryColor,
-              surfaceColor: surfaceColor,
-              borderColor: borderColor,
-              textColor: textColor,
-              mutedTextColor: mutedTextColor,
-              trailing: HeaderActionButton(
-                icon: Icons.qr_code_rounded,
-                label: LocalizationService.get('connect_new_device'),
-                onPressed: onConnectDevice,
-                primaryColor: primaryColor,
-              ),
-            ),
+            _pageTitle(),
             _section(
               title: LocalizationService.get('settings_general'),
               children: [
@@ -238,6 +191,34 @@ class SettingsBody extends StatelessWidget {
           ],
         );
       },
+    );
+  }
+
+  Widget _pageTitle() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 10, 24, 18),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            LocalizationService.get('settings'),
+            style: TextStyle(
+              color: textColor,
+              fontSize: 32,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            '${LocalizationService.get('room_short_label')} ${_compactRoomId(roomId)}',
+            style: TextStyle(
+              color: mutedTextColor,
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
