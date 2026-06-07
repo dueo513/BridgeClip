@@ -163,6 +163,7 @@ Before sharing a build:
 - Build Android release APK.
 - Build Android release App Bundle.
 - Package artifacts with `tools\package_release.ps1`.
+- Verify packaged artifacts with `tools\verify_release.ps1`.
 - Install and launch the APK.
 - Launch the Windows app.
 - Verify host Windows clipboard upload.
