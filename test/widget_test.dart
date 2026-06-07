@@ -46,9 +46,11 @@ void main() {
     GlobalState.pendingJoinRoomId = null;
   });
 
-  test('settings check localization keys resolve', () {
+  test('settings localization keys resolve', () {
     LocalizationService.currentLang.value = AppLang.en;
 
+    expect(LocalizationService.get('settings'), 'Settings');
+    expect(LocalizationService.get('settings_theme'), 'Theme');
     expect(LocalizationService.get('settings_check'), 'Settings check');
     expect(LocalizationService.get('status_push_token'), 'Push token');
     expect(LocalizationService.get('status_auto_start'), 'Auto-start');
@@ -56,6 +58,11 @@ void main() {
       LocalizationService.get('status_push_token_desktop_hint'),
       isNot('status_push_token_desktop_hint'),
     );
+
+    LocalizationService.currentLang.value = AppLang.ko;
+    expect(LocalizationService.get('settings'), '설정');
+    expect(LocalizationService.get('language_ko'), '한국어');
+    expect(LocalizationService.get('status_on'), '켜짐');
   });
 
   test('generated room id uses the BridgeClip invite format', () {

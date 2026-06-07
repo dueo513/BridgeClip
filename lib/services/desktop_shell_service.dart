@@ -33,7 +33,6 @@ class DesktopShellService {
           appName: 'BridgeClip',
           appPath: Platform.resolvedExecutable,
         );
-        await launchAtStartup.enable();
         await trayManager.setIcon(PlatformService.windowsTrayIconPath());
       }
 

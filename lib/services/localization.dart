@@ -34,10 +34,10 @@ class LocalizationService {
   }
 
   static const Map<String, String> _ko = {
-    'create_room': '새 Room 만들기',
+    'create_room': 'Room 만들기',
     'join_room': '기존 Room 참가',
     'create_room_desc':
-        '앱이 중복 가능성이 낮은 Room ID를 자동으로 만듭니다. 다른 기기에는 이 Room ID와 같은 비밀번호를 입력하세요.',
+        '중복 가능성이 낮은 Room ID를 자동으로 만듭니다. 다른 기기에는 이 Room ID와 같은 비밀번호를 입력하세요.',
     'join_room_desc':
         '이미 만든 Room ID와 같은 비밀번호를 입력하세요. 존재하지 않는 Room에는 참가할 수 없습니다.',
     'btn_create_room': 'Room 만들고 시작',
@@ -53,10 +53,20 @@ class LocalizationService {
     'devices_count': '{0}개 기기',
     'status_summary': '상태 요약',
     'status_items': '항목',
-    'status_auto_delete': '자동삭제',
+    'status_auto_delete': '자동 삭제',
     'sync_ready': '동기화 준비됨',
     'filters_active': '필터 적용 중',
     'quick_actions': '빠른 상태',
+    'settings': '설정',
+    'settings_general': '일반',
+    'settings_security': '보안',
+    'settings_connection': '연결',
+    'settings_account': '계정',
+    'settings_theme': '테마',
+    'settings_open': '열기',
+    'settings_update_failed': '설정을 변경하지 못했습니다.',
+    'theme_dark': '다크 모드',
+    'theme_light': '라이트 모드',
     'connect_new_device': '새 기기 연결',
     'connect_new_device_desc':
         '다른 기기에서 이 Room ID를 입력하거나 QR을 스캔하세요. 비밀번호는 별도로 입력해야 합니다.',
@@ -80,7 +90,7 @@ class LocalizationService {
     'room_id_label': 'Room ID',
     'room_id_hint': '예: my_secret_room',
     'password_label': '보안 비밀번호',
-    'password_hint': '종단간 암호화(E2EE)에 사용됩니다',
+    'password_hint': '종단간 암호화(E2EE)에 사용됩니다.',
     'btn_start_sync': '동기화 시작',
     'login_info': '다른 기기에서도 같은 정보를 입력하면 동기화됩니다.',
 
@@ -120,10 +130,11 @@ class LocalizationService {
     'timer_1h_short': '1시간',
     'timer_1d_short': '1일',
     'timer_minutes_short': '{0}분',
-    'timer_set_msg': '자동 삭제 시간이 {0}(으)로 설정되었습니다.',
+    'timer_set_msg': '자동 삭제 시간을 {0}(으)로 설정했습니다.',
     'logout_title': '연결 해제',
-    'logout_msg': '현재 클립보드 금고에서 로그아웃할까요?',
-    'btn_logout': '로그아웃',
+    'logout_msg': '현재 클립보드 금고에서 연결을 해제할까요?',
+    'btn_logout': '연결 해제',
+
     'device_management': '기기 관리',
     'connected_room': '연결된 Room: {0}',
     'connected_devices': '연결된 기기',
@@ -137,7 +148,8 @@ class LocalizationService {
     'device_name_hint': '예: 내 노트북',
     'empty_devices': '연결된 기기가 없습니다.',
     'remove_device_msg': '{0} 기기를 제거할까요?',
-    'remove_current_device_msg': '현재 기기를 제거하면 이 앱은 연결 해제됩니다.',
+    'remove_current_device_msg': '현재 기기를 제거하면 이 앱의 연결도 해제됩니다.',
+
     'app_lock_title': '앱 잠금',
     'app_locked_title': 'BridgeClip 잠김',
     'app_locked_message': '동기화는 계속 진행됩니다. 내용을 보려면 PIN을 입력하세요.',
@@ -155,6 +167,7 @@ class LocalizationService {
     'pin_changed': 'PIN을 변경했습니다.',
     'app_lock_wrong_pin': 'PIN이 올바르지 않습니다.',
     'app_lock_pin_mismatch': 'PIN은 4-12자리 숫자여야 하며, 두 입력이 같아야 합니다.',
+
     'onboarding_help': '처음 사용하는 방법',
     'onboarding_skip': '건너뛰기',
     'onboarding_next': '다음',
@@ -164,10 +177,11 @@ class LocalizationService {
         'Windows와 Android에서 같은 Room ID와 비밀번호를 입력하면 하나의 개인 클립보드 금고로 동기화됩니다.',
     'onboarding_e2ee_title': '비밀번호로 E2EE 보호',
     'onboarding_e2ee_body':
-        '비밀번호는 서버에 저장되지 않습니다. 클립보드 내용은 기기 안에서 암호화되고, 같은 비밀번호를 가진 기기에서만 복호화됩니다.',
+        '비밀번호는 서버에 저장되지 않습니다. 클립보드 내용은 기기 안에서 암호화되고 같은 비밀번호를 가진 기기에서만 복호화됩니다.',
     'onboarding_realtime_title': '복사하면 바로 도착',
     'onboarding_realtime_body':
-        'Windows는 트레이에 숨어도 계속 감시합니다. Android는 알림 권한을 켜면 새 클립을 받고 복사/선택 복사 액션을 바로 사용할 수 있습니다.',
+        'Windows는 트레이에서 계속 감시합니다. Android는 알림 권한을 켜면 새 클립을 받고 복사/선택 복사 액션을 바로 사용할 수 있습니다.',
+
     'settings_check': '설정 점검',
     'settings_check_desc': '동기화가 안 될 때 먼저 볼 현재 기기 상태입니다.',
     'status_room': 'Room ID',
@@ -184,13 +198,13 @@ class LocalizationService {
     'status_not_needed': '해당 없음',
     'status_checking': '확인 중',
     'status_notifications_hint': 'Android에서는 알림을 켜야 새 클립을 빠르게 받을 수 있습니다.',
-    'status_push_token_hint': '앱을 다시 열거나 알림 권한을 확인하면 토큰이 다시 등록됩니다.',
+    'status_push_token_hint': '앱을 다시 열거나 알림 권한을 확인하면 토큰을 다시 등록합니다.',
     'status_push_token_desktop_hint': '데스크톱은 푸시 토큰 없이 Firestore 동기화를 사용합니다.',
-    'status_app_lock_hint': '앱 잠금은 화면만 가리고 동기화는 계속됩니다.',
-    'status_auto_start_hint': 'Windows 시작 후 자동 동기화를 원하면 자동 시작을 켜야 합니다.',
+    'status_app_lock_hint': '앱 잠금은 화면만 가리고 동기화는 계속 진행됩니다.',
+    'status_auto_start_hint': 'Windows 시작 후 자동 동기화를 원하면 자동 시작을 켜세요.',
 
     'tray_show': 'BridgeClip 열기',
-    'tray_ready': '시작 프로그램 등록됨',
+    'tray_ready': '자동 시작 상태',
     'tray_exit': '완전히 종료',
   };
 
@@ -219,6 +233,16 @@ class LocalizationService {
     'sync_ready': 'Ready to sync',
     'filters_active': 'Filters active',
     'quick_actions': 'Quick status',
+    'settings': 'Settings',
+    'settings_general': 'General',
+    'settings_security': 'Security',
+    'settings_connection': 'Connection',
+    'settings_account': 'Account',
+    'settings_theme': 'Theme',
+    'settings_open': 'Open',
+    'settings_update_failed': 'Could not update the setting.',
+    'theme_dark': 'Dark mode',
+    'theme_light': 'Light mode',
     'connect_new_device': 'Connect new device',
     'connect_new_device_desc':
         'Enter this Room ID or scan the QR code on another device. The password is entered separately.',
@@ -284,8 +308,9 @@ class LocalizationService {
     'timer_minutes_short': '{0} min',
     'timer_set_msg': 'Timer is set to {0}.',
     'logout_title': 'Disconnect',
-    'logout_msg': 'Log out from this clipboard vault?',
-    'btn_logout': 'Log out',
+    'logout_msg': 'Disconnect this app from the current clipboard vault?',
+    'btn_logout': 'Disconnect',
+
     'device_management': 'Device management',
     'connected_room': 'Connected Room: {0}',
     'connected_devices': 'Connected devices',
@@ -301,6 +326,7 @@ class LocalizationService {
     'remove_device_msg': 'Remove {0}?',
     'remove_current_device_msg':
         'Removing this device will disconnect this app.',
+
     'app_lock_title': 'App lock',
     'app_locked_title': 'BridgeClip is locked',
     'app_locked_message':
@@ -320,6 +346,7 @@ class LocalizationService {
     'app_lock_wrong_pin': 'Incorrect PIN.',
     'app_lock_pin_mismatch':
         'PIN must be 4-12 digits, and both entries must match.',
+
     'onboarding_help': 'How to use BridgeClip',
     'onboarding_skip': 'Skip',
     'onboarding_next': 'Next',
@@ -333,6 +360,7 @@ class LocalizationService {
     'onboarding_realtime_title': 'Copy and it arrives',
     'onboarding_realtime_body':
         'Windows keeps watching from the tray. On Android, enable notifications to receive new clips and use copy or select-copy actions quickly.',
+
     'settings_check': 'Settings check',
     'settings_check_desc':
         'Current device status to check first when sync does not work.',
@@ -361,7 +389,7 @@ class LocalizationService {
         'Enable auto-start if you want sync to resume when Windows starts.',
 
     'tray_show': 'Open BridgeClip',
-    'tray_ready': 'Auto-start enabled',
+    'tray_ready': 'Auto-start status',
     'tray_exit': 'Exit completely',
   };
 }

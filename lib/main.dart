@@ -36,6 +36,7 @@ import 'widgets/clipboard_body.dart';
 import 'widgets/connect_device_sheet.dart';
 import 'widgets/device_management_body.dart';
 import 'widgets/locked_scaffold.dart';
+import 'widgets/settings_body.dart';
 import 'widgets/top_icon_button.dart';
 
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
@@ -275,6 +276,7 @@ class _ClipboardHomeState extends State<ClipboardHome>
   String _currentDeviceName = PlatformService.defaultDeviceName();
   bool _isArchiveTab = false;
   bool _isDeviceManagementTab = false;
+  bool _isSettingsTab = false;
   bool _isNotificationEnabled = true;
   bool _isAppLockEnabled = false;
   bool _isLocked = false;
@@ -1049,55 +1051,15 @@ class _ClipboardHomeState extends State<ClipboardHome>
             centerTitle: true,
             actions: [
               _buildTopIconButton(
-                tooltip: AppThemeService.isDark ? 'Light mode' : 'Dark mode',
-                onPressed: AppThemeService.toggle,
-                icon: AppThemeService.isDark
-                    ? Icons.light_mode_rounded
-                    : Icons.dark_mode_rounded,
-              ),
-              _buildLanguageTopButton(lang),
-              _buildTopIconButton(
-                icon: _isNotificationEnabled
-                    ? Icons.notifications_active_rounded
-                    : Icons.notifications_off_rounded,
-                active: _isNotificationEnabled,
-                tooltip: LocalizationService.get('status_notifications'),
-                onPressed: _toggleNotification,
-              ),
-              _buildTopIconButton(
-                icon: Icons.timer_rounded,
-                active: _autoDeleteMinutes > 0,
-                tooltip: LocalizationService.get('timer_title'),
-                onPressed: _showTimerDialog,
-              ),
-              _buildTopIconButton(
-                icon: Icons.logout_rounded,
-                tooltip: LocalizationService.get('logout_title'),
-                danger: true,
+                tooltip: LocalizationService.get('settings'),
+                icon: Icons.tune_rounded,
+                active: _isSettingsTab,
                 onPressed: () {
-                  showDialog<void>(
-                    context: context,
-                    builder: (context) => AlertDialog(
-                      title: Text(LocalizationService.get('logout_title')),
-                      content: Text(LocalizationService.get('logout_msg')),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.pop(context),
-                          child: Text(LocalizationService.get('cancel')),
-                        ),
-                        TextButton(
-                          onPressed: () {
-                            Navigator.pop(context);
-                            _logout();
-                          },
-                          style: TextButton.styleFrom(
-                            foregroundColor: Colors.redAccent,
-                          ),
-                          child: Text(LocalizationService.get('btn_logout')),
-                        ),
-                      ],
-                    ),
-                  );
+                  setState(() {
+                    _isArchiveTab = false;
+                    _isDeviceManagementTab = false;
+                    _isSettingsTab = true;
+                  });
                 },
               ),
             ],
@@ -1195,23 +1157,33 @@ class _ClipboardHomeState extends State<ClipboardHome>
                 ListTile(
                   leading: Icon(
                     Icons.list,
-                    color: !_isArchiveTab && !_isDeviceManagementTab
+                    color:
+                        !_isArchiveTab &&
+                            !_isDeviceManagementTab &&
+                            !_isSettingsTab
                         ? _primaryColor
                         : _mutedTextColor,
                   ),
                   title: Text(
                     LocalizationService.get('clipboard'),
                     style: TextStyle(
-                      color: !_isArchiveTab && !_isDeviceManagementTab
+                      color:
+                          !_isArchiveTab &&
+                              !_isDeviceManagementTab &&
+                              !_isSettingsTab
                           ? _primaryColor
                           : _textColor,
                     ),
                   ),
-                  selected: !_isArchiveTab && !_isDeviceManagementTab,
+                  selected:
+                      !_isArchiveTab &&
+                      !_isDeviceManagementTab &&
+                      !_isSettingsTab,
                   onTap: () {
                     setState(() {
                       _isArchiveTab = false;
                       _isDeviceManagementTab = false;
+                      _isSettingsTab = false;
                     });
                     Navigator.pop(context);
                   },
@@ -1236,6 +1208,7 @@ class _ClipboardHomeState extends State<ClipboardHome>
                     setState(() {
                       _isArchiveTab = true;
                       _isDeviceManagementTab = false;
+                      _isSettingsTab = false;
                     });
                     Navigator.pop(context);
                   },
@@ -1257,7 +1230,32 @@ class _ClipboardHomeState extends State<ClipboardHome>
                   ),
                   selected: _isDeviceManagementTab,
                   onTap: () {
-                    setState(() => _isDeviceManagementTab = true);
+                    setState(() {
+                      _isArchiveTab = false;
+                      _isDeviceManagementTab = true;
+                      _isSettingsTab = false;
+                    });
+                    Navigator.pop(context);
+                  },
+                ),
+                ListTile(
+                  leading: Icon(
+                    Icons.tune_rounded,
+                    color: _isSettingsTab ? _primaryColor : _mutedTextColor,
+                  ),
+                  title: Text(
+                    LocalizationService.get('settings'),
+                    style: TextStyle(
+                      color: _isSettingsTab ? _primaryColor : _textColor,
+                    ),
+                  ),
+                  selected: _isSettingsTab,
+                  onTap: () {
+                    setState(() {
+                      _isArchiveTab = false;
+                      _isDeviceManagementTab = false;
+                      _isSettingsTab = true;
+                    });
                     Navigator.pop(context);
                   },
                 ),
@@ -1280,7 +1278,9 @@ class _ClipboardHomeState extends State<ClipboardHome>
               ],
             ),
           ),
-          body: _isDeviceManagementTab
+          body: _isSettingsTab
+              ? _buildSettingsBody(lang)
+              : _isDeviceManagementTab
               ? _buildDeviceManagementBody(lang)
               : _buildClipboardBody(lang),
         );
@@ -1308,50 +1308,16 @@ class _ClipboardHomeState extends State<ClipboardHome>
     );
   }
 
-  Widget _buildLanguageTopButton(AppLang lang) {
-    final label = lang == AppLang.ko ? 'KO' : 'EN';
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 3),
-      child: Tooltip(
-        message: LocalizationService.get('language_en'),
-        child: InkWell(
-          onTap: () => _showChoiceSheet<AppLang>(
-            title: LocalizationService.get('language_title'),
-            value: lang,
-            options: const [AppLang.ko, AppLang.en],
-            labelFor: (value) => value == AppLang.ko
-                ? LocalizationService.get('language_ko')
-                : LocalizationService.get('language_en'),
-            iconFor: (_) => Icons.language_rounded,
-            onSelected: LocalizationService.setLanguage,
-          ),
-          borderRadius: BorderRadius.circular(14),
-          child: Container(
-            height: 38,
-            padding: const EdgeInsets.symmetric(horizontal: 10),
-            decoration: BoxDecoration(
-              color: _softFillColor,
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: _borderColor),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.public_rounded, color: _primaryColor, size: 19),
-                const SizedBox(width: 5),
-                Text(
-                  label,
-                  style: TextStyle(
-                    color: _textColor,
-                    fontWeight: FontWeight.w800,
-                    fontSize: 12,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
+  Future<void> _showLanguageSheet(AppLang lang) {
+    return _showChoiceSheet<AppLang>(
+      title: LocalizationService.get('language_title'),
+      value: lang,
+      options: const [AppLang.ko, AppLang.en],
+      labelFor: (value) => value == AppLang.ko
+          ? LocalizationService.get('language_ko')
+          : LocalizationService.get('language_en'),
+      iconFor: (_) => Icons.language_rounded,
+      onSelected: LocalizationService.setLanguage,
     );
   }
 
@@ -1536,6 +1502,87 @@ class _ClipboardHomeState extends State<ClipboardHome>
     );
   }
 
+  Widget _buildSettingsBody(AppLang lang) {
+    return SettingsBody(
+      roomId: widget.roomId,
+      deviceStream: _db.watchDevices(),
+      lang: lang,
+      currentDeviceId: _currentDeviceId,
+      notificationsEnabled: _isNotificationEnabled,
+      autoDeleteMinutes: _autoDeleteMinutes,
+      appLockEnabled: _isAppLockEnabled,
+      launchAtStartupEnabled: _launchAtStartupEnabled,
+      primaryColor: _primaryColor,
+      surfaceColor: _surfaceColor,
+      softFillColor: _softFillColor,
+      borderColor: _borderColor,
+      textColor: _textColor,
+      mutedTextColor: _mutedTextColor,
+      onConnectDevice: _showConnectDeviceSheet,
+      onShowLanguage: () => _showLanguageSheet(lang),
+      onToggleTheme: AppThemeService.toggle,
+      onToggleNotifications: _toggleNotification,
+      onShowAutoDelete: _showTimerDialog,
+      onShowAppLock: _showAppLockDialog,
+      onToggleLaunchAtStartup: _setLaunchAtStartup,
+      onCopyRoomId: () => _copyConnectionText(widget.roomId),
+      onLogout: _confirmLogout,
+    );
+  }
+
+  Future<void> _setLaunchAtStartup(bool enabled) async {
+    if (!Platform.isWindows) return;
+
+    try {
+      launchAtStartup.setup(
+        appName: 'BridgeClip',
+        appPath: Platform.resolvedExecutable,
+      );
+
+      if (enabled) {
+        await launchAtStartup.enable();
+      } else {
+        await launchAtStartup.disable();
+      }
+
+      if (!mounted) return;
+      setState(() => _launchAtStartupEnabled = enabled);
+    } catch (e) {
+      debugPrint('Launch-at-startup toggle failed: $e');
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(LocalizationService.get('settings_update_failed')),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+    }
+  }
+
+  void _confirmLogout() {
+    showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(LocalizationService.get('logout_title')),
+        content: Text(LocalizationService.get('logout_msg')),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(LocalizationService.get('cancel')),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              _logout();
+            },
+            style: TextButton.styleFrom(foregroundColor: Colors.redAccent),
+            child: Text(LocalizationService.get('btn_logout')),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _removeDevice(DeviceInfo device) {
     showDialog<void>(
       context: context,
@@ -1632,5 +1679,4 @@ class _ClipboardHomeState extends State<ClipboardHome>
       return true;
     }).toList();
   }
-
 }
