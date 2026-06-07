@@ -1051,7 +1051,6 @@ class _ClipboardHomeState extends State<ClipboardHome>
               children: [
                 Container(
                   height: 164,
-                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       begin: Alignment.topLeft,
@@ -1062,53 +1061,59 @@ class _ClipboardHomeState extends State<ClipboardHome>
                       ],
                     ),
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
+                  child: SafeArea(
+                    bottom: false,
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(12),
-                            child: Image.asset(
-                              'assets/logo.png',
-                              width: 42,
-                              height: 42,
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          const Expanded(
-                            child: Text(
-                              'BridgeClip',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 25,
-                                height: 1.05,
-                                fontWeight: FontWeight.w900,
+                          Row(
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: Image.asset(
+                                  'assets/logo.png',
+                                  width: 42,
+                                  height: 42,
+                                  fit: BoxFit.cover,
+                                ),
                               ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
+                              const SizedBox(width: 12),
+                              const Expanded(
+                                child: Text(
+                                  'BridgeClip',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 25,
+                                    height: 1.05,
+                                    fontWeight: FontWeight.w900,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const Spacer(),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: [
+                              _drawerHeaderChip(
+                                icon: Icons.meeting_room_rounded,
+                                text:
+                                    '${LocalizationService.get('room_short_label')} ${_compactRoomId(widget.roomId)}',
+                              ),
+                              _drawerHeaderChip(
+                                icon: Icons.check_circle_rounded,
+                                text: LocalizationService.get('sync_ready'),
+                              ),
+                            ],
                           ),
                         ],
                       ),
-                      const Spacer(),
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        children: [
-                          _drawerHeaderChip(
-                            icon: Icons.meeting_room_rounded,
-                            text:
-                                '${LocalizationService.get('room_short_label')} ${_compactRoomId(widget.roomId)}',
-                          ),
-                          _drawerHeaderChip(
-                            icon: Icons.check_circle_rounded,
-                            text: LocalizationService.get('sync_ready'),
-                          ),
-                        ],
-                      ),
-                    ],
+                    ),
                   ),
                 ),
                 ListTile(
