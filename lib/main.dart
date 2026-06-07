@@ -34,8 +34,10 @@ import 'widgets/app_drawer.dart';
 import 'widgets/auto_delete_timer_dialog.dart';
 import 'widgets/clipboard_body.dart';
 import 'widgets/connect_device_sheet.dart';
+import 'widgets/confirm_action_dialog.dart';
 import 'widgets/language_menu_button.dart';
 import 'widgets/locked_scaffold.dart';
+import 'widgets/rename_device_dialog.dart';
 import 'widgets/select_copy_dialog.dart';
 import 'widgets/settings_body.dart';
 
@@ -817,48 +819,14 @@ class _ClipboardHomeState extends State<ClipboardHome>
   }
 
   void _showRenameDeviceDialog() {
-    final controller = TextEditingController(text: _currentDeviceName);
     showDialog<void>(
       context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF1E1E1E),
-        title: Text(
-          LocalizationService.get('device_rename_title'),
-          style: const TextStyle(color: Colors.white),
-        ),
-        content: TextField(
-          controller: controller,
-          autofocus: true,
-          style: const TextStyle(color: Colors.white),
-          decoration: InputDecoration(
-            hintText: LocalizationService.get('device_name_hint'),
-            hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.4)),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(
-              LocalizationService.get('cancel'),
-              style: const TextStyle(color: Colors.white54),
-            ),
-          ),
-          TextButton(
-            onPressed: () async {
-              final newName = controller.text.trim();
-              if (newName.isEmpty) return;
-              final navigator = Navigator.of(context);
-              await _db.renameCurrentDevice(newName);
-              if (!mounted) return;
-              setState(() => _currentDeviceName = newName);
-              navigator.pop();
-            },
-            child: Text(
-              LocalizationService.get('ok'),
-              style: const TextStyle(color: Colors.blueAccent),
-            ),
-          ),
-        ],
+      builder: (_) => RenameDeviceDialog(
+        initialName: _currentDeviceName,
+        onRename: (newName) async {
+          await _db.renameCurrentDevice(newName);
+          if (mounted) setState(() => _currentDeviceName = newName);
+        },
       ),
     );
   }
@@ -1187,23 +1155,11 @@ class _ClipboardHomeState extends State<ClipboardHome>
   void _confirmLogout() {
     showDialog<void>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(LocalizationService.get('logout_title')),
-        content: Text(LocalizationService.get('logout_msg')),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(LocalizationService.get('cancel')),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              _logout();
-            },
-            style: TextButton.styleFrom(foregroundColor: Colors.redAccent),
-            child: Text(LocalizationService.get('btn_logout')),
-          ),
-        ],
+      builder: (_) => ConfirmActionDialog(
+        title: LocalizationService.get('logout_title'),
+        message: LocalizationService.get('logout_msg'),
+        confirmLabel: LocalizationService.get('btn_logout'),
+        onConfirm: _logout,
       ),
     );
   }
@@ -1211,41 +1167,32 @@ class _ClipboardHomeState extends State<ClipboardHome>
   void _removeDevice(DeviceInfo device) {
     showDialog<void>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(LocalizationService.get('remove_device')),
-        content: Text(
-          device.isCurrentDevice
-              ? LocalizationService.get('remove_current_device_msg')
-              : LocalizationService.getFormatted('remove_device_msg', [
-                  device.deviceName,
-                ]),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(LocalizationService.get('cancel')),
-          ),
-          TextButton(
-            onPressed: () async {
-              Navigator.pop(context);
-              if (device.isCurrentDevice) {
-                await _removeCurrentDeviceAndLogout();
-                return;
-              }
-              final messenger = ScaffoldMessenger.of(context);
-              await _db.deleteDevice(device.id);
-              if (!mounted) return;
-              messenger.showSnackBar(
-                SnackBar(
-                  content: Text(LocalizationService.get('device_removed')),
-                  backgroundColor: Colors.redAccent,
-                ),
-              );
-            },
-            style: TextButton.styleFrom(foregroundColor: Colors.redAccent),
-            child: Text(LocalizationService.get('remove_device')),
-          ),
-        ],
+      builder: (_) => ConfirmActionDialog(
+        title: LocalizationService.get('remove_device'),
+        message: device.isCurrentDevice
+            ? LocalizationService.get('remove_current_device_msg')
+            : LocalizationService.getFormatted('remove_device_msg', [
+                device.deviceName,
+              ]),
+        confirmLabel: LocalizationService.get('remove_device'),
+        onConfirm: () => _deleteConfirmedDevice(device),
+      ),
+    );
+  }
+
+  Future<void> _deleteConfirmedDevice(DeviceInfo device) async {
+    if (device.isCurrentDevice) {
+      await _removeCurrentDeviceAndLogout();
+      return;
+    }
+
+    final messenger = ScaffoldMessenger.of(context);
+    await _db.deleteDevice(device.id);
+    if (!mounted) return;
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(LocalizationService.get('device_removed')),
+        backgroundColor: Colors.redAccent,
       ),
     );
   }
