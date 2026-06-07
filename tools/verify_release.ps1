@@ -1,12 +1,31 @@
 param(
-  [Parameter(Mandatory = $true)]
   [string]$ReleasePath,
   [switch]$RequireStoreSigning
 )
 
 $ErrorActionPreference = "Stop"
 
-$releaseRoot = Resolve-Path $ReleasePath
+function Resolve-ReleaseRoot {
+  param([string]$Path)
+
+  if (-not [string]::IsNullOrWhiteSpace($Path)) {
+    return Resolve-Path $Path
+  }
+
+  $releaseRoot = Join-Path (Resolve-Path (Join-Path $PSScriptRoot "..")) "release"
+  $latestRelease = Get-ChildItem $releaseRoot -Directory -ErrorAction SilentlyContinue |
+    Where-Object { $_.Name -match '^BridgeClip-\d{8}-\d{4}$' } |
+    Sort-Object Name -Descending |
+    Select-Object -First 1
+
+  if ($null -eq $latestRelease) {
+    throw "No release folder found. Pass -ReleasePath explicitly."
+  }
+
+  return $latestRelease.FullName
+}
+
+$releaseRoot = Resolve-ReleaseRoot -Path $ReleasePath
 $requiredFiles = @(
   "BridgeClip-Android-release.apk",
   "BridgeClip-Android-release.aab",

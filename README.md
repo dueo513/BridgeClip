@@ -182,10 +182,13 @@ powershell -NoProfile -ExecutionPolicy Bypass -File tools\package_release.ps1 -B
 powershell -NoProfile -ExecutionPolicy Bypass -File tools\verify_release.ps1
 ```
 
+When `-ReleasePath` is omitted, the verifier uses the newest official
+`release\BridgeClip-YYYYMMDD-HHMM` folder.
+
 For a store-submission gate, require a non-debug APK signer:
 
 ```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File tools\verify_release.ps1 -ReleasePath release\BridgeClip-20260608-0240 -RequireStoreSigning
+powershell -NoProfile -ExecutionPolicy Bypass -File tools\verify_release.ps1 -RequireStoreSigning
 ```
 
 ## Release Checklist

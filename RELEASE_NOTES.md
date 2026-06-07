@@ -52,6 +52,7 @@ Artifacts:
 - Release artifact SHA-256 verification: passed.
 - `tools\package_release.ps1` release packaging smoke test: passed.
 - `tools\verify_release.ps1` release verification: passed with debug-signing warning.
+- `tools\verify_release.ps1` can infer the latest official release folder when `-ReleasePath` is omitted.
 - `tools\verify_release.ps1 -RequireStoreSigning` is available as the final store-submission gate.
 - Login screen logo/password hint visual check on emulator: passed.
 - Search field one-character input check on emulator: passed.
