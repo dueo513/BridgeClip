@@ -54,6 +54,10 @@ function Find-Jarsigner {
 }
 
 $releaseRoot = Resolve-ReleaseRoot -Path $ReleasePath
+$repoRoot = Resolve-Path (Join-Path $PSScriptRoot "..")
+$releaseParent = Resolve-Path (Join-Path $repoRoot "release")
+$releaseName = Split-Path $releaseRoot -Leaf
+$releaseId = $releaseName -replace '^BridgeClip-', ''
 $requiredFiles = @(
   "BridgeClip-Android-release.apk",
   "BridgeClip-Android-release.aab",
@@ -93,6 +97,35 @@ if ($failures.Count -eq 0) {
     $actualLength = (Get-Item $path).Length
     if ($actualHash -ne $parts[0] -or $actualLength -ne [int64]$parts[1]) {
       $failures.Add("Hash or size mismatch: $($parts[2])")
+    }
+  }
+}
+
+if ($failures.Count -eq 0) {
+  $latestPath = Join-Path $releaseParent "LATEST.txt"
+  if (-not (Test-Path $latestPath)) {
+    $message = "release\LATEST.txt is missing."
+    if ($RequireStoreSigning) {
+      $failures.Add($message)
+    } else {
+      $warnings.Add($message)
+    }
+  } else {
+    $latestLines = Get-Content -Encoding UTF8 $latestPath
+    $expectedLatestLines = @(
+      "BridgeClip latest release",
+      "ReleaseId: $releaseId",
+      "Path: release\$releaseName",
+      "Windows: release\$releaseName\BridgeClip-Windows-release.zip",
+      "Android APK: release\$releaseName\BridgeClip-Android-release.apk",
+      "Android App Bundle: release\$releaseName\BridgeClip-Android-release.aab",
+      "SHA-256: release\$releaseName\SHA256SUMS.txt"
+    )
+
+    foreach ($expectedLine in $expectedLatestLines) {
+      if ($latestLines -notcontains $expectedLine) {
+        $failures.Add("release\LATEST.txt does not match the verified release. Missing line: $expectedLine")
+      }
     }
   }
 }

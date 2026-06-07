@@ -6,7 +6,7 @@ Goal: optimize code without removing or changing intended app features, then pro
 
 Release folder:
 
-- `release\BridgeClip-20260608-0348`
+- `release\BridgeClip-20260608-0352`
 
 ## Release Artifacts
 
@@ -35,8 +35,10 @@ Release folder:
 - `tools\package_release.ps1` packaged APK, AAB, Windows zip, release documents, SHA-256 sums, and automatic release verification successfully in a script smoke check.
 - `tools\package_release.ps1` removes newly created packages when automatic release verification fails unless `-KeepFailedPackage` is passed.
 - `tools\package_release.ps1` writes `release\LATEST.txt` after successful packaging.
+- `tools\package_release.ps1` restores the previous `release\LATEST.txt` if automatic release verification fails.
+- `tools\verify_release.ps1` checks that `release\LATEST.txt` matches the verified release.
 - `tools\package_release.ps1` rewrites packaged `RELEASE_NOTES.md` artifact paths and `RELEASE_AUDIT.md` release folder references to the current `ReleaseId`.
-- `tools\verify_release.ps1` passed for `release\BridgeClip-20260608-0348`, including required artifact checks, SHA-256 verification, Windows zip content checks, and APK/AAB signature verification.
+- `tools\verify_release.ps1` passed for `release\BridgeClip-20260608-0352`, including required artifact checks, SHA-256 verification, Windows zip content checks, and APK/AAB signature verification.
 - `tools\verify_release.ps1` can infer the latest official `BridgeClip-YYYYMMDD-HHMM` release folder when `-ReleasePath` is omitted.
 - `tools\verify_release.ps1 -RequireStoreSigning` is available to fail store-submission verification when the APK or AAB is still debug-signed.
 - Service account files and `googleapis_auth` are not present in client dependencies or source; only README guidance mentions not shipping service-account credentials.

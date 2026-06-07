@@ -13,9 +13,9 @@ and iOS are planned as a later Apple platform phase.
 - Backend: Firebase Auth, Firestore, Cloud Functions, FCM
 - Encryption: AES-256-GCM with a PBKDF2-derived key
 - Latest validated artifacts:
-  - `release\BridgeClip-20260608-0348\BridgeClip-Windows-release.zip`
-  - `release\BridgeClip-20260608-0348\BridgeClip-Android-release.apk`
-  - `release\BridgeClip-20260608-0348\BridgeClip-Android-release.aab`
+  - `release\BridgeClip-20260608-0352\BridgeClip-Windows-release.zip`
+  - `release\BridgeClip-20260608-0352\BridgeClip-Android-release.apk`
+  - `release\BridgeClip-20260608-0352\BridgeClip-Android-release.aab`
 
 ## Features
 
@@ -185,7 +185,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File tools\package_release.ps1 -B
 unless `-SkipVerify` is passed. If that verification fails for a newly created
 release folder, the package is removed unless `-KeepFailedPackage` is passed.
 Successful packaging writes `release\LATEST.txt` with the current artifact paths.
-When `-ReleasePath` is omitted, the verifier uses the newest official
+The verifier checks that file against the release being verified. When
+`-ReleasePath` is omitted, the verifier uses the newest official
 `release\BridgeClip-YYYYMMDD-HHMM` folder.
 
 For a store-submission gate, require non-debug Android APK and App Bundle signers:

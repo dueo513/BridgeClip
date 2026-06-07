@@ -17,6 +17,11 @@ $releaseIndexPath = Join-Path $repoRoot "release\LATEST.txt"
 $windowsStage = Join-Path $releaseRoot "BridgeClip-Windows-release"
 $windowsZip = Join-Path $releaseRoot "BridgeClip-Windows-release.zip"
 $releaseExistedBefore = Test-Path $releaseRoot
+$latestExistedBefore = Test-Path $releaseIndexPath
+$previousLatestLines = @()
+if ($latestExistedBefore) {
+  $previousLatestLines = Get-Content -Encoding UTF8 $releaseIndexPath
+}
 
 function Update-PackagedReleasePaths {
   param(
@@ -116,6 +121,18 @@ if (-not (Test-Path (Join-Path $windowsStage "clipboard_sync.exe"))) {
 Write-Host "Release packaged: $releaseRoot"
 Write-Host "SHA-256 verification: $hashOk"
 
+$latestLines = @(
+  "BridgeClip latest release",
+  "ReleaseId: $ReleaseId",
+  "Path: release\BridgeClip-$ReleaseId",
+  "Windows: release\BridgeClip-$ReleaseId\BridgeClip-Windows-release.zip",
+  "Android APK: release\BridgeClip-$ReleaseId\BridgeClip-Android-release.apk",
+  "Android App Bundle: release\BridgeClip-$ReleaseId\BridgeClip-Android-release.aab",
+  "SHA-256: release\BridgeClip-$ReleaseId\SHA256SUMS.txt"
+)
+
+Set-Content -Encoding UTF8 -Path $releaseIndexPath -Value $latestLines
+
 if (-not $SkipVerify) {
   $verifyScript = Join-Path $PSScriptRoot "verify_release.ps1"
   $verifyArgs = @(
@@ -134,6 +151,14 @@ if (-not $SkipVerify) {
 
   & powershell @verifyArgs
   if ($LASTEXITCODE -ne 0) {
+    if ($latestExistedBefore) {
+      Set-Content -Encoding UTF8 -Path $releaseIndexPath -Value $previousLatestLines
+      Write-Host "Restored previous latest release index: $releaseIndexPath"
+    } elseif (Test-Path $releaseIndexPath) {
+      Remove-Item -Force -LiteralPath $releaseIndexPath
+      Write-Host "Removed failed latest release index: $releaseIndexPath"
+    }
+
     if ((-not $releaseExistedBefore) -and (-not $KeepFailedPackage) -and (Test-Path $releaseRoot)) {
       $resolvedReleaseRoot = (Resolve-Path $releaseRoot).Path
       $resolvedReleaseParent = (Resolve-Path (Join-Path $repoRoot "release")).Path
@@ -151,15 +176,4 @@ if (-not $SkipVerify) {
   }
 }
 
-$latestLines = @(
-  "BridgeClip latest release",
-  "ReleaseId: $ReleaseId",
-  "Path: release\BridgeClip-$ReleaseId",
-  "Windows: release\BridgeClip-$ReleaseId\BridgeClip-Windows-release.zip",
-  "Android APK: release\BridgeClip-$ReleaseId\BridgeClip-Android-release.apk",
-  "Android App Bundle: release\BridgeClip-$ReleaseId\BridgeClip-Android-release.aab",
-  "SHA-256: release\BridgeClip-$ReleaseId\SHA256SUMS.txt"
-)
-
-Set-Content -Encoding UTF8 -Path $releaseIndexPath -Value $latestLines
 Write-Host "Latest release index updated: $releaseIndexPath"
