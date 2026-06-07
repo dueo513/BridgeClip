@@ -29,6 +29,7 @@ import 'services/platform_service.dart';
 import 'services/theme_service.dart';
 import 'state/global_state.dart';
 import 'widgets/app_lock_dialogs.dart';
+import 'widgets/auto_delete_timer_dialog.dart';
 import 'widgets/choice_sheet.dart';
 import 'widgets/clipboard_body.dart';
 import 'widgets/connect_device_sheet.dart';
@@ -914,71 +915,27 @@ class _ClipboardHomeState extends State<ClipboardHome>
   void _showTimerDialog() {
     showDialog<void>(
       context: context,
-      builder: (context) {
-        return AlertDialog(
-          backgroundColor: const Color(0xFF1E1E1E),
-          title: Text(
-            LocalizationService.get('timer_title'),
-            style: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _buildTimerOption(
-                LocalizationService.get('timer_keep_forever'),
-                0,
-              ),
-              _buildTimerOption(LocalizationService.get('timer_1m'), 1),
-              _buildTimerOption(LocalizationService.get('timer_10m'), 10),
-              _buildTimerOption(LocalizationService.get('timer_1h'), 60),
-              _buildTimerOption(LocalizationService.get('timer_1d'), 1440),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text(
-                LocalizationService.get('close'),
-                style: const TextStyle(color: Colors.white54),
-              ),
-            ),
-          ],
-        );
-      },
+      builder: (context) => AutoDeleteTimerDialog(
+        selectedMinutes: _autoDeleteMinutes,
+        onSelected: _setAutoDeleteTimer,
+      ),
     );
   }
 
-  Widget _buildTimerOption(String title, int minutes) {
-    final isSelected = _autoDeleteMinutes == minutes;
-    return ListTile(
-      title: Text(
-        title,
-        style: TextStyle(
-          color: isSelected ? Colors.blueAccent : Colors.white70,
-        ),
-      ),
-      trailing: isSelected
-          ? const Icon(Icons.check_circle, color: Colors.blueAccent)
-          : null,
-      onTap: () async {
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setInt('autoDeleteMinutes', minutes);
+  Future<void> _setAutoDeleteTimer(AutoDeleteTimerChoice choice) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('autoDeleteMinutes', choice.minutes);
 
-        if (!mounted) return;
-        setState(() => _autoDeleteMinutes = minutes);
-        Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              LocalizationService.getFormatted('timer_set_msg', [title]),
-            ),
-            backgroundColor: Colors.blueAccent,
-          ),
-        );
-      },
+    if (!mounted) return;
+    setState(() => _autoDeleteMinutes = choice.minutes);
+    Navigator.pop(context);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          LocalizationService.getFormatted('timer_set_msg', [choice.label]),
+        ),
+        backgroundColor: Colors.blueAccent,
+      ),
     );
   }
 
