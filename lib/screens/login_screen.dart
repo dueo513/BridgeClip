@@ -9,7 +9,7 @@ import '../services/database_service.dart';
 import '../services/localization.dart';
 import '../services/theme_service.dart';
 import '../state/global_state.dart';
-import '../widgets/choice_sheet.dart';
+import '../widgets/language_menu_button.dart';
 import 'onboarding_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -181,7 +181,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               Padding(
                 padding: const EdgeInsets.only(right: 14),
-                child: _buildLanguageButton(lang),
+                child: LanguageMenuButton(lang: lang),
               ),
             ],
           ),
@@ -460,89 +460,6 @@ class _LoginScreenState extends State<LoginScreen> {
         ],
       ),
     );
-  }
-
-  Widget _buildLanguageButton(AppLang lang) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-    final isDark = theme.brightness == Brightness.dark;
-    final label = lang == AppLang.ko
-        ? LocalizationService.get('language_ko')
-        : LocalizationService.get('language_en');
-    return InkWell(
-      onTap: () => _showLanguageSheet(lang),
-      borderRadius: BorderRadius.circular(999),
-      child: Container(
-        height: 38,
-        padding: const EdgeInsets.symmetric(horizontal: 12),
-        decoration: BoxDecoration(
-          color: isDark
-              ? Colors.white.withValues(alpha: 0.08)
-              : Colors.black.withValues(alpha: 0.045),
-          borderRadius: BorderRadius.circular(999),
-          border: Border.all(
-            color: isDark
-                ? Colors.white.withValues(alpha: 0.10)
-                : Colors.black.withValues(alpha: 0.07),
-          ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.language_rounded, size: 18, color: scheme.primary),
-            const SizedBox(width: 7),
-            Text(
-              label,
-              style: TextStyle(
-                color: scheme.onSurface,
-                fontSize: 13,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            const SizedBox(width: 4),
-            Icon(
-              Icons.keyboard_arrow_down_rounded,
-              size: 18,
-              color: scheme.onSurface.withValues(alpha: 0.56),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Future<void> _showLanguageSheet(AppLang lang) async {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-    final isDark = theme.brightness == Brightness.dark;
-    final selected = await showModalBottomSheet<AppLang>(
-      context: context,
-      backgroundColor: Colors.transparent,
-      constraints: const BoxConstraints(maxWidth: 520),
-      builder: (context) => ChoiceSheet<AppLang>(
-        title: LocalizationService.get('language_title'),
-        value: lang,
-        options: const [AppLang.ko, AppLang.en],
-        labelFor: (value) => value == AppLang.ko
-            ? LocalizationService.get('language_ko')
-            : LocalizationService.get('language_en'),
-        iconFor: (_) => Icons.language_rounded,
-        primaryColor: scheme.primary,
-        surfaceColor: scheme.surface,
-        softFillColor: isDark
-            ? Colors.white.withValues(alpha: 0.06)
-            : Colors.black.withValues(alpha: 0.035),
-        borderColor: isDark
-            ? Colors.white.withValues(alpha: 0.08)
-            : Colors.black.withValues(alpha: 0.06),
-        textColor: scheme.onSurface,
-        mutedTextColor: scheme.onSurface.withValues(alpha: 0.56),
-      ),
-    );
-
-    if (selected != null) {
-      await LocalizationService.setLanguage(selected);
-    }
   }
 
   Widget _buildFieldLabel(String text) {
