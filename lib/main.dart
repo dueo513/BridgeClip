@@ -1134,69 +1134,23 @@ class _ClipboardHomeState extends State<ClipboardHome>
                     });
                   },
                 ),
-                ListTile(
-                  leading: Icon(
-                    Icons.list,
-                    color: !_isArchiveTab && !_isSettingsTab
-                        ? _primaryColor
-                        : _mutedTextColor,
-                  ),
-                  title: Text(
-                    LocalizationService.get('clipboard'),
-                    style: TextStyle(
-                      color: !_isArchiveTab && !_isSettingsTab
-                          ? _primaryColor
-                          : _textColor,
-                    ),
-                  ),
+                _drawerNavTile(
+                  icon: Icons.list,
+                  title: LocalizationService.get('clipboard'),
                   selected: !_isArchiveTab && !_isSettingsTab,
-                  onTap: () {
-                    setState(() {
-                      _isArchiveTab = false;
-                      _isSettingsTab = false;
-                    });
-                    Navigator.pop(context);
-                  },
+                  onTap: () => _selectDrawerTab(context),
                 ),
-                ListTile(
-                  leading: Icon(
-                    Icons.archive,
-                    color: _isArchiveTab ? _primaryColor : _mutedTextColor,
-                  ),
-                  title: Text(
-                    LocalizationService.get('archive'),
-                    style: TextStyle(
-                      color: _isArchiveTab ? _primaryColor : _textColor,
-                    ),
-                  ),
+                _drawerNavTile(
+                  icon: Icons.archive,
+                  title: LocalizationService.get('archive'),
                   selected: _isArchiveTab,
-                  onTap: () {
-                    setState(() {
-                      _isArchiveTab = true;
-                      _isSettingsTab = false;
-                    });
-                    Navigator.pop(context);
-                  },
+                  onTap: () => _selectDrawerTab(context, archive: true),
                 ),
-                ListTile(
-                  leading: Icon(
-                    Icons.tune_rounded,
-                    color: _isSettingsTab ? _primaryColor : _mutedTextColor,
-                  ),
-                  title: Text(
-                    LocalizationService.get('settings'),
-                    style: TextStyle(
-                      color: _isSettingsTab ? _primaryColor : _textColor,
-                    ),
-                  ),
+                _drawerNavTile(
+                  icon: Icons.tune_rounded,
+                  title: LocalizationService.get('settings'),
                   selected: _isSettingsTab,
-                  onTap: () {
-                    setState(() {
-                      _isArchiveTab = false;
-                      _isSettingsTab = true;
-                    });
-                    Navigator.pop(context);
-                  },
+                  onTap: () => _selectDrawerTab(context, settings: true),
                 ),
               ],
             ),
@@ -1252,6 +1206,35 @@ class _ClipboardHomeState extends State<ClipboardHome>
         ],
       ),
     );
+  }
+
+  Widget _drawerNavTile({
+    required IconData icon,
+    required String title,
+    required bool selected,
+    required VoidCallback onTap,
+  }) {
+    return ListTile(
+      leading: Icon(icon, color: selected ? _primaryColor : _mutedTextColor),
+      title: Text(
+        title,
+        style: TextStyle(color: selected ? _primaryColor : _textColor),
+      ),
+      selected: selected,
+      onTap: onTap,
+    );
+  }
+
+  void _selectDrawerTab(
+    BuildContext context, {
+    bool archive = false,
+    bool settings = false,
+  }) {
+    setState(() {
+      _isArchiveTab = archive;
+      _isSettingsTab = settings;
+    });
+    Navigator.pop(context);
   }
 
   Widget _buildLockedScaffold() {
