@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../models/clipboard_item.dart';
 import '../services/localization.dart';
+import '../utils/room_id_format.dart';
 import 'clipboard_row.dart';
 import 'search_and_filters.dart';
 
@@ -108,7 +109,7 @@ class ClipboardBody extends StatelessWidget {
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  '${LocalizationService.get('room_short_label')} ${_compactRoomId(roomId)}',
+                  '${LocalizationService.get('room_short_label')} ${compactRoomId(roomId)}',
                   style: TextStyle(
                     color: mutedTextColor,
                     fontSize: 16,
@@ -194,10 +195,5 @@ class ClipboardBody extends StatelessWidget {
       onTogglePin: () => onTogglePin(item),
       onDelete: () => onDelete(item),
     );
-  }
-
-  String _compactRoomId(String roomId) {
-    if (roomId.length <= 18) return roomId;
-    return '${roomId.substring(0, 11)}...${roomId.substring(roomId.length - 4)}';
   }
 }

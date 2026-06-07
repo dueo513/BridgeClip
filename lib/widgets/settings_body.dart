@@ -6,6 +6,7 @@ import '../models/device_info.dart';
 import '../services/localization.dart';
 import '../services/platform_service.dart';
 import '../services/theme_service.dart';
+import '../utils/room_id_format.dart';
 import 'device_row.dart';
 
 class SettingsBody extends StatelessWidget {
@@ -194,7 +195,7 @@ class SettingsBody extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           Text(
-            '${LocalizationService.get('room_short_label')} ${_compactRoomId(roomId)}',
+            '${LocalizationService.get('room_short_label')} ${compactRoomId(roomId)}',
             style: TextStyle(
               color: mutedTextColor,
               fontSize: 16,
@@ -377,10 +378,5 @@ class SettingsBody extends StatelessWidget {
         '$autoDeleteMinutes',
       ]),
     };
-  }
-
-  String _compactRoomId(String roomId) {
-    if (roomId.length <= 18) return roomId;
-    return '${roomId.substring(0, 11)}...${roomId.substring(roomId.length - 4)}';
   }
 }
