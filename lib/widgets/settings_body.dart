@@ -6,6 +6,7 @@ import '../models/device_info.dart';
 import '../services/localization.dart';
 import '../services/platform_service.dart';
 import '../services/theme_service.dart';
+import 'device_row.dart';
 
 class SettingsBody extends StatelessWidget {
   const SettingsBody({
@@ -31,6 +32,8 @@ class SettingsBody extends StatelessWidget {
     required this.onShowAppLock,
     required this.onToggleLaunchAtStartup,
     required this.onCopyRoomId,
+    required this.onRenameCurrentDevice,
+    required this.onRemoveDevice,
     required this.onLogout,
   });
 
@@ -55,6 +58,8 @@ class SettingsBody extends StatelessWidget {
   final VoidCallback onShowAppLock;
   final FutureOr<void> Function(bool value) onToggleLaunchAtStartup;
   final VoidCallback onCopyRoomId;
+  final VoidCallback onRenameCurrentDevice;
+  final ValueChanged<DeviceInfo> onRemoveDevice;
   final VoidCallback onLogout;
 
   @override
@@ -154,6 +159,7 @@ class SettingsBody extends StatelessWidget {
                   ),
               ],
             ),
+            _deviceManagementSection(devices),
             _section(
               title: LocalizationService.get('settings_account'),
               children: [
@@ -226,6 +232,84 @@ class SettingsBody extends StatelessWidget {
             ...children,
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _deviceManagementSection(List<DeviceInfo> devices) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(8, 0, 8, 10),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    LocalizationService.get('device_management'),
+                    style: TextStyle(
+                      color: mutedTextColor,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: primaryColor.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(999),
+                    border: Border.all(
+                      color: primaryColor.withValues(alpha: 0.22),
+                    ),
+                  ),
+                  child: Text(
+                    LocalizationService.getFormatted('devices_count', [
+                      '${devices.length}',
+                    ]),
+                    style: TextStyle(
+                      color: primaryColor,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (devices.isEmpty)
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: surfaceColor,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: borderColor),
+              ),
+              child: Text(
+                LocalizationService.get('empty_devices'),
+                style: TextStyle(color: mutedTextColor),
+              ),
+            )
+          else
+            for (final device in devices)
+              DeviceRow(
+                device: device,
+                lang: lang,
+                primaryColor: primaryColor,
+                surfaceColor: surfaceColor,
+                borderColor: borderColor,
+                textColor: textColor,
+                mutedTextColor: mutedTextColor,
+                onRename: onRenameCurrentDevice,
+                onRemove: () => onRemoveDevice(device),
+              ),
+        ],
       ),
     );
   }

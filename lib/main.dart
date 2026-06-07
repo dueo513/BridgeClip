@@ -34,7 +34,6 @@ import 'widgets/auto_delete_timer_dialog.dart';
 import 'widgets/choice_sheet.dart';
 import 'widgets/clipboard_body.dart';
 import 'widgets/connect_device_sheet.dart';
-import 'widgets/device_management_body.dart';
 import 'widgets/locked_scaffold.dart';
 import 'widgets/settings_body.dart';
 
@@ -274,7 +273,6 @@ class _ClipboardHomeState extends State<ClipboardHome>
   String? _currentDeviceId;
   String _currentDeviceName = PlatformService.defaultDeviceName();
   bool _isArchiveTab = false;
-  bool _isDeviceManagementTab = false;
   bool _isSettingsTab = false;
   bool _isNotificationEnabled = true;
   bool _isAppLockEnabled = false;
@@ -1139,32 +1137,22 @@ class _ClipboardHomeState extends State<ClipboardHome>
                 ListTile(
                   leading: Icon(
                     Icons.list,
-                    color:
-                        !_isArchiveTab &&
-                            !_isDeviceManagementTab &&
-                            !_isSettingsTab
+                    color: !_isArchiveTab && !_isSettingsTab
                         ? _primaryColor
                         : _mutedTextColor,
                   ),
                   title: Text(
                     LocalizationService.get('clipboard'),
                     style: TextStyle(
-                      color:
-                          !_isArchiveTab &&
-                              !_isDeviceManagementTab &&
-                              !_isSettingsTab
+                      color: !_isArchiveTab && !_isSettingsTab
                           ? _primaryColor
                           : _textColor,
                     ),
                   ),
-                  selected:
-                      !_isArchiveTab &&
-                      !_isDeviceManagementTab &&
-                      !_isSettingsTab,
+                  selected: !_isArchiveTab && !_isSettingsTab,
                   onTap: () {
                     setState(() {
                       _isArchiveTab = false;
-                      _isDeviceManagementTab = false;
                       _isSettingsTab = false;
                     });
                     Navigator.pop(context);
@@ -1173,48 +1161,18 @@ class _ClipboardHomeState extends State<ClipboardHome>
                 ListTile(
                   leading: Icon(
                     Icons.archive,
-                    color: _isArchiveTab && !_isDeviceManagementTab
-                        ? _primaryColor
-                        : _mutedTextColor,
+                    color: _isArchiveTab ? _primaryColor : _mutedTextColor,
                   ),
                   title: Text(
                     LocalizationService.get('archive'),
                     style: TextStyle(
-                      color: _isArchiveTab && !_isDeviceManagementTab
-                          ? _primaryColor
-                          : _textColor,
+                      color: _isArchiveTab ? _primaryColor : _textColor,
                     ),
                   ),
-                  selected: _isArchiveTab && !_isDeviceManagementTab,
+                  selected: _isArchiveTab,
                   onTap: () {
                     setState(() {
                       _isArchiveTab = true;
-                      _isDeviceManagementTab = false;
-                      _isSettingsTab = false;
-                    });
-                    Navigator.pop(context);
-                  },
-                ),
-                ListTile(
-                  leading: Icon(
-                    Icons.devices,
-                    color: _isDeviceManagementTab
-                        ? _primaryColor
-                        : _mutedTextColor,
-                  ),
-                  title: Text(
-                    LocalizationService.get('device_management'),
-                    style: TextStyle(
-                      color: _isDeviceManagementTab
-                          ? _primaryColor
-                          : _textColor,
-                    ),
-                  ),
-                  selected: _isDeviceManagementTab,
-                  onTap: () {
-                    setState(() {
-                      _isArchiveTab = false;
-                      _isDeviceManagementTab = true;
                       _isSettingsTab = false;
                     });
                     Navigator.pop(context);
@@ -1235,7 +1193,6 @@ class _ClipboardHomeState extends State<ClipboardHome>
                   onTap: () {
                     setState(() {
                       _isArchiveTab = false;
-                      _isDeviceManagementTab = false;
                       _isSettingsTab = true;
                     });
                     Navigator.pop(context);
@@ -1246,8 +1203,6 @@ class _ClipboardHomeState extends State<ClipboardHome>
           ),
           body: _isSettingsTab
               ? _buildSettingsBody(lang)
-              : _isDeviceManagementTab
-              ? _buildDeviceManagementBody(lang)
               : _buildClipboardBody(lang),
         );
       },
@@ -1407,21 +1362,6 @@ class _ClipboardHomeState extends State<ClipboardHome>
     }
   }
 
-  Widget _buildDeviceManagementBody(AppLang lang) {
-    return DeviceManagementBody(
-      roomId: widget.roomId,
-      deviceStream: _db.watchDevices(),
-      lang: lang,
-      primaryColor: _primaryColor,
-      surfaceColor: _surfaceColor,
-      borderColor: _borderColor,
-      textColor: _textColor,
-      mutedTextColor: _mutedTextColor,
-      onRenameCurrentDevice: _showRenameDeviceDialog,
-      onRemoveDevice: _removeDevice,
-    );
-  }
-
   Widget _buildSettingsBody(AppLang lang) {
     return SettingsBody(
       roomId: widget.roomId,
@@ -1445,6 +1385,8 @@ class _ClipboardHomeState extends State<ClipboardHome>
       onShowAppLock: _showAppLockDialog,
       onToggleLaunchAtStartup: _setLaunchAtStartup,
       onCopyRoomId: () => _copyConnectionText(widget.roomId),
+      onRenameCurrentDevice: _showRenameDeviceDialog,
+      onRemoveDevice: _removeDevice,
       onLogout: _confirmLogout,
     );
   }
