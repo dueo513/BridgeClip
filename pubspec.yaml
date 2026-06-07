@@ -90,6 +90,8 @@ flutter:
     - assets/launcher_icon_ios_tinted_grayscale.png
     - assets/launcher_icon_windows_dark.png
     - assets/launcher_icon_windows_light.png
+    - assets/android_themed_mark_dark.png
+    - assets/android_themed_mark_light.png
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
 
