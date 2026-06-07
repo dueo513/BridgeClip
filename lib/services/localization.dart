@@ -34,20 +34,19 @@ class LocalizationService {
   }
 
   static const Map<String, String> _ko = {
-    'create_room': 'Room 만들기',
-    'join_room': '기존 Room 참가',
+    'create_room': '방 만들기',
+    'join_room': '기존 방 참가',
     'create_room_desc':
-        '중복 가능성이 낮은 Room ID를 자동으로 만듭니다. 다른 기기에는 이 Room ID와 같은 비밀번호를 입력하세요.',
-    'join_room_desc':
-        '이미 만든 Room ID와 같은 비밀번호를 입력하세요. 존재하지 않는 Room에는 참가할 수 없습니다.',
-    'btn_create_room': 'Room 만들고 시작',
-    'btn_join_room': 'Room 참가',
-    'btn_regenerate_room': 'Room ID 다시 만들기',
-    'room_not_found': 'Room을 찾을 수 없습니다. Room ID를 다시 확인해 주세요.',
-    'room_create_failed': 'Room을 만들 수 없습니다. 잠시 후 다시 시도해 주세요.',
-    'room_join_failed': 'Room에 참가할 수 없습니다. 네트워크 상태와 Room ID를 확인해 주세요.',
+        '중복 가능성이 낮은 방 ID를 자동으로 만듭니다. 다른 기기에는 이 방 ID와 같은 비밀번호를 입력하세요.',
+    'join_room_desc': '이미 만든 방 ID와 같은 비밀번호를 입력하세요. 존재하지 않는 방에는 참가할 수 없습니다.',
+    'btn_create_room': '방 만들고 시작',
+    'btn_join_room': '방 참가',
+    'btn_regenerate_room': '방 ID 다시 만들기',
+    'room_not_found': '방을 찾을 수 없습니다. 방 ID를 다시 확인해 주세요.',
+    'room_create_failed': '방을 만들 수 없습니다. 잠시 후 다시 시도해 주세요.',
+    'room_join_failed': '방에 참가할 수 없습니다. 네트워크 상태와 방 ID를 확인해 주세요.',
     'language_title': '언어',
-    'room_short_label': 'Room',
+    'room_short_label': '방',
     'items_count': '{0}개 항목',
     'items_count_short': '{0}개',
     'devices_count': '{0}개 기기',
@@ -69,9 +68,9 @@ class LocalizationService {
     'theme_light': '라이트 모드',
     'connect_new_device': '새 기기 연결',
     'connect_new_device_desc':
-        '다른 기기에서 이 Room ID를 입력하거나 QR을 스캔하세요. 비밀번호는 별도로 입력해야 합니다.',
+        '다른 기기에서 이 방 ID를 입력하거나 QR을 스캔하세요. 비밀번호는 별도로 입력해야 합니다.',
     'connection_link': '연결 링크',
-    'copy_room_id': 'Room ID 복사',
+    'copy_room_id': '방 ID 복사',
     'copy_connection_link': '연결 링크 복사',
     'connection_copied': '연결 정보가 복사되었습니다.',
     'language_ko': '한국어',
@@ -85,9 +84,9 @@ class LocalizationService {
     'unknown': '알 수 없음',
 
     'login_title': '나만의 클립보드 금고에 연결하세요.',
-    'login_err_empty': 'Room ID와 보안 비밀번호를 모두 입력하세요.',
+    'login_err_empty': '방 ID와 보안 비밀번호를 모두 입력하세요.',
     'login_err_key': '암호화 키를 만들 수 없습니다.',
-    'room_id_label': 'Room ID',
+    'room_id_label': '방 ID',
     'room_id_hint': '예: my_secret_room',
     'password_label': '보안 비밀번호',
     'password_hint': '종단간 암호화(E2EE)에 사용됩니다.',
@@ -131,7 +130,7 @@ class LocalizationService {
     'btn_logout': '연결 해제',
 
     'device_management': '기기 관리',
-    'connected_room': '연결된 Room: {0}',
+    'connected_room': '연결된 방: {0}',
     'connected_devices': '연결된 기기',
     'current_device': '현재 기기',
     'rename_device': '기기 이름 변경',
@@ -167,9 +166,9 @@ class LocalizationService {
     'onboarding_skip': '건너뛰기',
     'onboarding_next': '다음',
     'onboarding_start': 'BridgeClip 시작',
-    'onboarding_room_title': '같은 Room으로 연결',
+    'onboarding_room_title': '같은 방으로 연결',
     'onboarding_room_body':
-        'Windows와 Android에서 같은 Room ID와 비밀번호를 입력하면 하나의 개인 클립보드 금고로 동기화됩니다.',
+        'Windows와 Android에서 같은 방 ID와 비밀번호를 입력하면 하나의 개인 클립보드 금고로 동기화됩니다.',
     'onboarding_e2ee_title': '비밀번호로 E2EE 보호',
     'onboarding_e2ee_body':
         '비밀번호는 서버에 저장되지 않습니다. 클립보드 내용은 기기 안에서 암호화되고 같은 비밀번호를 가진 기기에서만 복호화됩니다.',
@@ -179,7 +178,7 @@ class LocalizationService {
 
     'settings_check': '설정 점검',
     'settings_check_desc': '동기화가 안 될 때 먼저 볼 현재 기기 상태입니다.',
-    'status_room': 'Room ID',
+    'status_room': '방 ID',
     'status_device_id': '기기 ID',
     'status_platform': '플랫폼',
     'status_notifications': '알림',
