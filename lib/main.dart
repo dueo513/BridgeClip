@@ -1240,22 +1240,6 @@ class _ClipboardHomeState extends State<ClipboardHome>
                     Navigator.pop(context);
                   },
                 ),
-                ListTile(
-                  leading: Icon(
-                    _isAppLockEnabled ? Icons.lock : Icons.lock_open,
-                    color: _isAppLockEnabled ? _primaryColor : _mutedTextColor,
-                  ),
-                  title: Text(
-                    LocalizationService.get('app_lock_title'),
-                    style: TextStyle(
-                      color: _isAppLockEnabled ? _primaryColor : _textColor,
-                    ),
-                  ),
-                  onTap: () {
-                    Navigator.pop(context);
-                    _showAppLockDialog();
-                  },
-                ),
               ],
             ),
           ),
