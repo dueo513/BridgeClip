@@ -219,6 +219,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File tools\run_release_checks.ps1
 - Package and verify artifacts with `tools\package_release.ps1`.
 - Confirm `release\LATEST.txt` points at the intended release folder.
 - Confirm `RELEASE_MANIFEST.json` is present in the release folder.
+- Run release app smoke checks with `tools\smoke_release_apps.ps1`.
 - For store submission, verify packaged artifacts and Android APK/AAB signing with
   `tools\run_release_checks.ps1 -RequireStoreSigning`.
 - Install and launch the APK.

@@ -49,6 +49,7 @@ Artifacts:
 - Android release APK launch smoke test on emulator: passed.
 - Android launcher icon visual check on emulator: passed.
 - Windows release executable smoke test: passed.
+- `tools\smoke_release_apps.ps1` release app smoke test: passed for Windows launch and Android emulator install/launch.
 - Release artifact SHA-256 verification: passed.
 - `tools\package_release.ps1` release packaging smoke test: passed, including automatic release verification.
 - `tools\package_release.ps1` removes newly created packages when automatic verification fails unless `-KeepFailedPackage` is passed.

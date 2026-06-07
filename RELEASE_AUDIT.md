@@ -31,6 +31,7 @@ Release folder:
 - Android launcher icon was visually checked on emulator.
 - Windows release zip contains `clipboard_sync.exe` and `flutter_windows.dll`.
 - Windows release `clipboard_sync.exe` started successfully from the release folder and was stopped after the smoke check.
+- `tools\smoke_release_apps.ps1` passed for Windows release launch and Android emulator APK install/launch.
 - `SHA256SUMS.txt` entries match the current release artifact hashes and file sizes.
 - `tools\package_release.ps1` packaged APK, AAB, Windows zip, release documents, SHA-256 sums, and automatic release verification successfully in a script smoke check.
 - `tools\package_release.ps1` removes newly created packages when automatic release verification fails unless `-KeepFailedPackage` is passed.
