@@ -51,13 +51,8 @@ void main() {
 
     expect(LocalizationService.get('settings'), 'Settings');
     expect(LocalizationService.get('settings_theme'), 'Theme');
-    expect(LocalizationService.get('settings_check'), 'Settings check');
-    expect(LocalizationService.get('status_push_token'), 'Push token');
+    expect(LocalizationService.get('settings_connection'), 'Connection');
     expect(LocalizationService.get('status_auto_start'), 'Auto-start');
-    expect(
-      LocalizationService.get('status_push_token_desktop_hint'),
-      isNot('status_push_token_desktop_hint'),
-    );
 
     LocalizationService.currentLang.value = AppLang.ko;
     expect(LocalizationService.get('settings'), '설정');

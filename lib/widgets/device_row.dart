@@ -16,7 +16,6 @@ class DeviceRow extends StatelessWidget {
     required this.mutedTextColor,
     required this.onRename,
     required this.onRemove,
-    required this.onNotificationsChanged,
   });
 
   final DeviceInfo device;
@@ -28,7 +27,6 @@ class DeviceRow extends StatelessWidget {
   final Color mutedTextColor;
   final VoidCallback onRename;
   final VoidCallback onRemove;
-  final ValueChanged<bool> onNotificationsChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -96,30 +94,6 @@ class DeviceRow extends StatelessWidget {
                   style: TextStyle(
                     color: textColor.withValues(alpha: 0.45),
                     fontSize: 12,
-                  ),
-                ),
-              if (device.isCurrentDevice)
-                Padding(
-                  padding: const EdgeInsets.only(top: 8),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          LocalizationService.get(
-                            'notifications_for_this_device',
-                          ),
-                          style: TextStyle(
-                            color: textColor.withValues(alpha: 0.65),
-                            fontSize: 12,
-                          ),
-                        ),
-                      ),
-                      Switch(
-                        value: device.notificationsEnabled,
-                        activeThumbColor: primaryColor,
-                        onChanged: onNotificationsChanged,
-                      ),
-                    ],
                   ),
                 ),
             ],

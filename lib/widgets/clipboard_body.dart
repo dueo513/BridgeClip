@@ -5,10 +5,7 @@ import 'package:flutter/material.dart';
 import '../models/clipboard_item.dart';
 import '../services/localization.dart';
 import 'clipboard_row.dart';
-import 'header_action_button.dart';
-import 'overview_header.dart';
 import 'search_and_filters.dart';
-import 'status_pill.dart';
 
 class ClipboardBody extends StatelessWidget {
   const ClipboardBody({
@@ -17,8 +14,6 @@ class ClipboardBody extends StatelessWidget {
     required this.clipboardStream,
     required this.lang,
     required this.isArchiveTab,
-    required this.notificationsEnabled,
-    required this.autoDeleteMinutes,
     required this.searchController,
     required this.searchQuery,
     required this.deviceFilter,
@@ -36,7 +31,6 @@ class ClipboardBody extends StatelessWidget {
     required this.onShowDeviceFilter,
     required this.onShowTimeFilter,
     required this.onClearFilters,
-    required this.onConnectDevice,
     required this.onCopy,
     required this.onTogglePin,
     required this.onDelete,
@@ -46,8 +40,6 @@ class ClipboardBody extends StatelessWidget {
   final Stream<List<ClipboardItem>> clipboardStream;
   final AppLang lang;
   final bool isArchiveTab;
-  final bool notificationsEnabled;
-  final int autoDeleteMinutes;
   final TextEditingController searchController;
   final String searchQuery;
   final String deviceFilter;
@@ -67,7 +59,6 @@ class ClipboardBody extends StatelessWidget {
   final FutureOr<void> Function(List<String> deviceOptions) onShowDeviceFilter;
   final FutureOr<void> Function() onShowTimeFilter;
   final VoidCallback onClearFilters;
-  final VoidCallback onConnectDevice;
   final ValueChanged<ClipboardItem> onCopy;
   final ValueChanged<ClipboardItem> onTogglePin;
   final ValueChanged<ClipboardItem> onDelete;
@@ -91,79 +82,72 @@ class ClipboardBody extends StatelessWidget {
 
         final visibleItems = visibleItemsFor(snapshot.data ?? []);
         final items = filteredItemsFor(visibleItems);
-        final hasActiveFilters =
-            searchQuery.isNotEmpty || deviceFilter != 'all' || timeFilter != 'all';
 
         return Column(
           children: [
-            OverviewHeader(
-              icon: isArchiveTab
-                  ? Icons.archive_rounded
-                  : Icons.content_paste_rounded,
-              title: isArchiveTab
-                  ? LocalizationService.get('archive')
-                  : LocalizationService.get('clipboard'),
-              subtitle:
-                  '${LocalizationService.get('room_short_label')} ${_compactRoomId(roomId)}',
-              pillsLabel: LocalizationService.get('status_summary'),
-              pills: [
-                StatusPill(
-                  icon: Icons.layers_rounded,
-                  label: LocalizationService.get('status_items'),
-                  text: LocalizationService.getFormatted('items_count_short', [
-                    '${items.length}',
-                  ]),
-                  primaryColor: primaryColor,
-                  textColor: textColor,
-                ),
-                StatusPill(
-                  icon: notificationsEnabled
-                      ? Icons.notifications_active_rounded
-                      : Icons.notifications_off_rounded,
-                  label: LocalizationService.get('status_notifications'),
-                  text: notificationsEnabled
-                      ? LocalizationService.get('status_on')
-                      : LocalizationService.get('status_off'),
-                  primaryColor: primaryColor,
-                  textColor: textColor,
-                  color: notificationsEnabled ? Colors.green : Colors.orange,
-                ),
-                StatusPill(
-                  icon: autoDeleteMinutes > 0
-                      ? Icons.timer_rounded
-                      : Icons.all_inclusive_rounded,
-                  label: LocalizationService.get('status_auto_delete'),
-                  text: _autoDeleteLabel(),
-                  primaryColor: primaryColor,
-                  textColor: textColor,
-                  color: autoDeleteMinutes > 0 ? Colors.indigoAccent : null,
-                ),
-                if (hasActiveFilters)
-                  StatusPill(
-                    icon: Icons.filter_alt_rounded,
-                    text: LocalizationService.get('filters_active'),
-                    primaryColor: primaryColor,
-                    textColor: textColor,
-                    color: Colors.amber,
-                  ),
-              ],
-              primaryColor: primaryColor,
-              surfaceColor: surfaceColor,
-              borderColor: borderColor,
-              textColor: textColor,
-              mutedTextColor: mutedTextColor,
-              trailing: HeaderActionButton(
-                icon: Icons.qr_code_rounded,
-                label: LocalizationService.get('connect_new_device'),
-                onPressed: onConnectDevice,
-                primaryColor: primaryColor,
-              ),
-            ),
+            _pageTitle(items.length),
             _searchAndFilters(visibleItems),
             Expanded(child: _contentList(visibleItems, items)),
           ],
         );
       },
+    );
+  }
+
+  Widget _pageTitle(int itemCount) {
+    final title = isArchiveTab
+        ? LocalizationService.get('archive')
+        : LocalizationService.get('clipboard');
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 10, 24, 18),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    color: textColor,
+                    fontSize: 32,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  '${LocalizationService.get('room_short_label')} ${_compactRoomId(roomId)}',
+                  style: TextStyle(
+                    color: mutedTextColor,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: primaryColor.withValues(alpha: 0.14),
+              borderRadius: BorderRadius.circular(999),
+              border: Border.all(color: primaryColor.withValues(alpha: 0.24)),
+            ),
+            child: Text(
+              LocalizationService.getFormatted('items_count_short', [
+                '$itemCount',
+              ]),
+              style: TextStyle(
+                color: primaryColor,
+                fontSize: 14,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -238,18 +222,5 @@ class ClipboardBody extends StatelessWidget {
   String _compactRoomId(String roomId) {
     if (roomId.length <= 18) return roomId;
     return '${roomId.substring(0, 11)}...${roomId.substring(roomId.length - 4)}';
-  }
-
-  String _autoDeleteLabel() {
-    return switch (autoDeleteMinutes) {
-      0 => LocalizationService.get('status_off'),
-      1 => LocalizationService.get('timer_1m_short'),
-      10 => LocalizationService.get('timer_10m_short'),
-      60 => LocalizationService.get('timer_1h_short'),
-      1440 => LocalizationService.get('timer_1d_short'),
-      _ => LocalizationService.getFormatted('timer_minutes_short', [
-        '$autoDeleteMinutes',
-      ]),
-    };
   }
 }

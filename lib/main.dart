@@ -1300,8 +1300,6 @@ class _ClipboardHomeState extends State<ClipboardHome>
       clipboardStream: _db.clipboardStream,
       lang: lang,
       isArchiveTab: _isArchiveTab,
-      notificationsEnabled: _isNotificationEnabled,
-      autoDeleteMinutes: _autoDeleteMinutes,
       searchController: _searchController,
       searchQuery: _searchQuery,
       deviceFilter: _deviceFilter,
@@ -1357,7 +1355,6 @@ class _ClipboardHomeState extends State<ClipboardHome>
           _timeFilter = 'all';
         });
       },
-      onConnectDevice: _showConnectDeviceSheet,
       onCopy: (item) => _copyToLocalClipboard(item.content),
       onTogglePin: (item) => _db.togglePin(item.id, item.isPinned),
       onDelete: _deleteItem,
@@ -1443,25 +1440,13 @@ class _ClipboardHomeState extends State<ClipboardHome>
       roomId: widget.roomId,
       deviceStream: _db.watchDevices(),
       lang: lang,
-      currentDeviceId: _currentDeviceId,
-      notificationsEnabled: _isNotificationEnabled,
-      appLockEnabled: _isAppLockEnabled,
-      launchAtStartupEnabled: _launchAtStartupEnabled,
       primaryColor: _primaryColor,
       surfaceColor: _surfaceColor,
       borderColor: _borderColor,
       textColor: _textColor,
       mutedTextColor: _mutedTextColor,
-      onConnectDevice: _showConnectDeviceSheet,
       onRenameCurrentDevice: _showRenameDeviceDialog,
       onRemoveDevice: _removeDevice,
-      onCurrentDeviceNotificationsChanged: (value) async {
-        await _db.setCurrentDeviceNotifications(value);
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setBool('isNotificationEnabled', value);
-        if (!mounted) return;
-        setState(() => _isNotificationEnabled = value);
-      },
     );
   }
 
