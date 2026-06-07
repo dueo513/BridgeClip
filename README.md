@@ -13,8 +13,9 @@ and iOS are planned as a later Apple platform phase.
 - Backend: Firebase Auth, Firestore, Cloud Functions, FCM
 - Encryption: AES-256-GCM with a PBKDF2-derived key
 - Latest validated artifacts:
-  - `C:\Users\shrud\.gemini\antigravity\scratch\bridgeclip_release_2026-06-05\BridgeClip-Windows-2026-06-07-host-emulator-final.zip`
-  - `C:\Users\shrud\.gemini\antigravity\scratch\bridgeclip_release_2026-06-05\BridgeClip-Android-2026-06-07-host-emulator-final.apk`
+  - `release\BridgeClip-20260608-0240\BridgeClip-Windows-release.zip`
+  - `release\BridgeClip-20260608-0240\BridgeClip-Android-release.apk`
+  - `release\BridgeClip-20260608-0240\BridgeClip-Android-release.aab`
 
 ## Features
 
@@ -152,6 +153,35 @@ Deploy Firebase support separately:
 firebase deploy --only firestore:rules,functions
 ```
 
+## Android Release Signing
+
+Local release builds fall back to the Android debug certificate when
+`android\key.properties` is missing. That is useful for QA, but not for Play
+submission.
+
+Check that the local machine can create an upload keystore:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File tools\create_android_upload_keystore.ps1 -DryRun
+```
+
+Create the ignored upload keystore and signing config:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File tools\create_android_upload_keystore.ps1
+```
+
+The command creates `android\app\upload-keystore.jks` and
+`android\key.properties`. Both are ignored by git. Back up the keystore and
+passwords securely; losing them can block future app updates.
+
+After creating the keystore, rebuild and verify the release package:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File tools\package_release.ps1 -Build
+powershell -NoProfile -ExecutionPolicy Bypass -File tools\verify_release.ps1
+```
+
 ## Release Checklist
 
 Before sharing a build:
@@ -159,6 +189,8 @@ Before sharing a build:
 - Run `flutter analyze`.
 - Run `flutter test`.
 - Run `npm --prefix functions run lint`.
+- For store submission, create `android\key.properties` with
+  `tools\create_android_upload_keystore.ps1`.
 - Build Windows release.
 - Build Android release APK.
 - Build Android release App Bundle.
