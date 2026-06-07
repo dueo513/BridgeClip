@@ -56,6 +56,7 @@ Artifacts:
 - `tools\package_release.ps1` restores the previous `release\LATEST.txt` if automatic verification fails.
 - `tools\verify_release.ps1` checks that `release\LATEST.txt` matches the verified release.
 - Release packages include `RELEASE_MANIFEST.json` with artifact hashes, sizes, and source commit.
+- `tools\run_release_checks.ps1` runs analyze, tests, Functions lint, and release verification as one final gate.
 - `tools\verify_release.ps1` release verification: passed with debug-signing warnings for APK and AAB.
 - `tools\verify_release.ps1` can infer the latest official release folder when `-ReleasePath` is omitted.
 - `tools\verify_release.ps1 -RequireStoreSigning` is available as the final APK/AAB store-submission signing gate.
@@ -80,6 +81,7 @@ firebase.cmd deploy --only firestore:rules,functions --project shrud-clip-2026-7
 - Android Quick Settings tile on a physical phone.
 - Phone reboot and app relaunch persistence.
 - Generate and back up a private upload/release keystore, then rebuild the APK/AAB with `tools\package_release.ps1 -Build -RequireStoreSigning`.
+- Run `tools\run_release_checks.ps1 -RequireStoreSigning` after the signed package is created.
 
 ### Known Constraints
 

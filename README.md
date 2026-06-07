@@ -201,6 +201,12 @@ powershell -NoProfile -ExecutionPolicy Bypass -File tools\package_release.ps1 -B
 
 Before sharing a build:
 
+- Run the full release gate:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File tools\run_release_checks.ps1
+```
+
 - Run `flutter analyze`.
 - Run `flutter test`.
 - Run `npm --prefix functions run lint`.
@@ -213,7 +219,7 @@ Before sharing a build:
 - Confirm `release\LATEST.txt` points at the intended release folder.
 - Confirm `RELEASE_MANIFEST.json` is present in the release folder.
 - For store submission, verify packaged artifacts and Android APK/AAB signing with
-  `tools\package_release.ps1 -RequireStoreSigning`.
+  `tools\run_release_checks.ps1 -RequireStoreSigning`.
 - Install and launch the APK.
 - Launch the Windows app.
 - Verify host Windows clipboard upload.
