@@ -1,0 +1,32 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function roomExists(roomId) {
+      return exists(/databases/$(database)/documents/rooms/$(roomId));
+    }
+
+    function validRoomId(roomId) {
+      return roomId.size() > 0 && roomId.size() <= 64;
+    }
+
+    match /rooms/{roomId} {
+      allow read: if signedIn();
+      allow create: if signedIn() && validRoomId(roomId);
+      allow update: if signedIn() && roomExists(roomId);
+      allow delete: if false;
+    }
+
+    match /users/{roomId}/clipboards/{clipId} {
+      allow read, create, update, delete: if signedIn() && roomExists(roomId);
+    }
+
+    match /users/{roomId}/tokens/{deviceId} {
+      allow read, create, update, delete: if signedIn() && roomExists(roomId);
+    }
+  }
+}
