@@ -16,8 +16,6 @@ class ClipboardBody extends StatelessWidget {
     required this.isArchiveTab,
     required this.searchController,
     required this.searchQuery,
-    required this.deviceFilter,
-    required this.timeFilter,
     required this.primaryColor,
     required this.surfaceColor,
     required this.softFillColor,
@@ -28,9 +26,6 @@ class ClipboardBody extends StatelessWidget {
     required this.filteredItemsFor,
     required this.onSearchChanged,
     required this.onClearSearch,
-    required this.onShowDeviceFilter,
-    required this.onShowTimeFilter,
-    required this.onClearFilters,
     required this.onCopy,
     required this.onTogglePin,
     required this.onDelete,
@@ -42,8 +37,6 @@ class ClipboardBody extends StatelessWidget {
   final bool isArchiveTab;
   final TextEditingController searchController;
   final String searchQuery;
-  final String deviceFilter;
-  final String timeFilter;
   final Color primaryColor;
   final Color surfaceColor;
   final Color softFillColor;
@@ -56,9 +49,6 @@ class ClipboardBody extends StatelessWidget {
   filteredItemsFor;
   final ValueChanged<String> onSearchChanged;
   final VoidCallback onClearSearch;
-  final FutureOr<void> Function(List<String> deviceOptions) onShowDeviceFilter;
-  final FutureOr<void> Function() onShowTimeFilter;
-  final VoidCallback onClearFilters;
   final ValueChanged<ClipboardItem> onCopy;
   final ValueChanged<ClipboardItem> onTogglePin;
   final ValueChanged<ClipboardItem> onDelete;
@@ -152,19 +142,9 @@ class ClipboardBody extends StatelessWidget {
   }
 
   Widget _searchAndFilters(List<ClipboardItem> visibleItems) {
-    final deviceOptions = <String>[
-      'all',
-      ...visibleItems.map((item) => item.deviceName).toSet().toList()..sort(),
-    ];
-    if (deviceFilter != 'all' && !deviceOptions.contains(deviceFilter)) {
-      deviceOptions.add(deviceFilter);
-    }
-
     return SearchAndFilters(
       searchController: searchController,
       searchQuery: searchQuery,
-      deviceFilter: deviceFilter,
-      timeFilter: timeFilter,
       surfaceColor: surfaceColor,
       softFillColor: softFillColor,
       borderColor: borderColor,
@@ -173,9 +153,6 @@ class ClipboardBody extends StatelessWidget {
       mutedTextColor: mutedTextColor,
       onSearchChanged: onSearchChanged,
       onClearSearch: onClearSearch,
-      onShowDeviceFilter: () => onShowDeviceFilter(deviceOptions),
-      onShowTimeFilter: onShowTimeFilter,
-      onClearFilters: onClearFilters,
     );
   }
 

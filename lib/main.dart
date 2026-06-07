@@ -281,8 +281,6 @@ class _ClipboardHomeState extends State<ClipboardHome>
   bool _isLocked = false;
   bool? _launchAtStartupEnabled;
   String _searchQuery = '';
-  String _deviceFilter = 'all';
-  String _timeFilter = 'all';
   int _autoDeleteMinutes = 0;
   DateTime? _autoDeleteActivatedAt;
   bool _isWritingClipboardFromApp = false;
@@ -1302,8 +1300,6 @@ class _ClipboardHomeState extends State<ClipboardHome>
       isArchiveTab: _isArchiveTab,
       searchController: _searchController,
       searchQuery: _searchQuery,
-      deviceFilter: _deviceFilter,
-      timeFilter: _timeFilter,
       primaryColor: _primaryColor,
       surfaceColor: _surfaceColor,
       softFillColor: _softFillColor,
@@ -1318,42 +1314,6 @@ class _ClipboardHomeState extends State<ClipboardHome>
       onClearSearch: () {
         _searchController.clear();
         setState(() => _searchQuery = '');
-      },
-      onShowDeviceFilter: (deviceOptions) => _showChoiceSheet<String>(
-        title: _deviceFilter == 'all'
-            ? LocalizationService.get('filter_all_devices')
-            : _deviceFilter,
-        value: _deviceFilter,
-        options: deviceOptions,
-        labelFor: (value) => value == 'all'
-            ? LocalizationService.get('filter_all_devices')
-            : value,
-        iconFor: (_) => Icons.devices,
-        onSelected: (selected) => setState(() => _deviceFilter = selected),
-      ),
-      onShowTimeFilter: () => _showChoiceSheet<String>(
-        title: switch (_timeFilter) {
-          'today' => LocalizationService.get('filter_today'),
-          'week' => LocalizationService.get('filter_this_week'),
-          _ => LocalizationService.get('filter_all_time'),
-        },
-        value: _timeFilter,
-        options: const ['all', 'today', 'week'],
-        labelFor: (value) => switch (value) {
-          'today' => LocalizationService.get('filter_today'),
-          'week' => LocalizationService.get('filter_this_week'),
-          _ => LocalizationService.get('filter_all_time'),
-        },
-        iconFor: (_) => Icons.schedule,
-        onSelected: (selected) => setState(() => _timeFilter = selected),
-      ),
-      onClearFilters: () {
-        _searchController.clear();
-        setState(() {
-          _searchQuery = '';
-          _deviceFilter = 'all';
-          _timeFilter = 'all';
-        });
       },
       onCopy: (item) => _copyToLocalClipboard(item.content),
       onTogglePin: (item) => _db.togglePin(item.id, item.isPinned),
@@ -1601,26 +1561,11 @@ class _ClipboardHomeState extends State<ClipboardHome>
   }
 
   List<ClipboardItem> _filteredItems(List<ClipboardItem> visibleItems) {
-    final now = DateTime.now();
     return visibleItems.where((item) {
       if (_searchQuery.isNotEmpty) {
         final target = '${item.content} ${item.deviceName} ${item.platform}'
             .toLowerCase();
         if (!target.contains(_searchQuery)) return false;
-      }
-
-      if (_deviceFilter != 'all' && item.deviceName != _deviceFilter) {
-        return false;
-      }
-
-      if (_timeFilter == 'today') {
-        final isSameDay =
-            item.timestamp.year == now.year &&
-            item.timestamp.month == now.month &&
-            item.timestamp.day == now.day;
-        if (!isSameDay) return false;
-      } else if (_timeFilter == 'week') {
-        if (now.difference(item.timestamp).inDays >= 7) return false;
       }
 
       return true;

@@ -104,11 +104,6 @@ class LocalizationService {
     'empty_list_archive': '아카이브가 비어 있습니다.',
     'empty_filtered_list': '조건에 맞는 클립보드가 없습니다.',
     'search_clipboards': '클립보드 검색',
-    'filter_all_devices': '모든 기기',
-    'filter_all_time': '전체 기간',
-    'filter_today': '오늘',
-    'filter_this_week': '최근 7일',
-    'clear_filters': '필터 초기화',
 
     'notification_title': '클립보드 동기화',
     'notification_body': '새 클립보드 데이터가 도착했습니다.',
@@ -280,11 +275,6 @@ class LocalizationService {
     'empty_list_archive': 'Archive is empty.',
     'empty_filtered_list': 'No clipboard items match these filters.',
     'search_clipboards': 'Search clipboard',
-    'filter_all_devices': 'All devices',
-    'filter_all_time': 'All time',
-    'filter_today': 'Today',
-    'filter_this_week': 'Last 7 days',
-    'clear_filters': 'Clear filters',
 
     'notification_title': 'Clipboard sync',
     'notification_body': 'New clipboard data arrived.',
