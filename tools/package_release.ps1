@@ -13,6 +13,7 @@ Set-Location $repoRoot
 
 $flutter = "C:\Users\shrud\.gemini\antigravity\scratch\flutter\bin\flutter.bat"
 $releaseRoot = Join-Path $repoRoot "release\BridgeClip-$ReleaseId"
+$releaseIndexPath = Join-Path $repoRoot "release\LATEST.txt"
 $windowsStage = Join-Path $releaseRoot "BridgeClip-Windows-release"
 $windowsZip = Join-Path $releaseRoot "BridgeClip-Windows-release.zip"
 $releaseExistedBefore = Test-Path $releaseRoot
@@ -149,3 +150,16 @@ if (-not $SkipVerify) {
     throw "Release verification failed after packaging."
   }
 }
+
+$latestLines = @(
+  "BridgeClip latest release",
+  "ReleaseId: $ReleaseId",
+  "Path: release\BridgeClip-$ReleaseId",
+  "Windows: release\BridgeClip-$ReleaseId\BridgeClip-Windows-release.zip",
+  "Android APK: release\BridgeClip-$ReleaseId\BridgeClip-Android-release.apk",
+  "Android App Bundle: release\BridgeClip-$ReleaseId\BridgeClip-Android-release.aab",
+  "SHA-256: release\BridgeClip-$ReleaseId\SHA256SUMS.txt"
+)
+
+Set-Content -Encoding UTF8 -Path $releaseIndexPath -Value $latestLines
+Write-Host "Latest release index updated: $releaseIndexPath"
