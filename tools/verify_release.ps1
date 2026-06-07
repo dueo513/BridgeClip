@@ -65,6 +65,7 @@ $requiredFiles = @(
   "BridgeClip-Windows-release\clipboard_sync.exe",
   "RELEASE_NOTES.md",
   "RELEASE_AUDIT.md",
+  "PHYSICAL_QA_CHECKLIST.md",
   "RELEASE_MANIFEST.json",
   "SHA256SUMS.txt"
 )
@@ -134,7 +135,8 @@ if ($failures.Count -eq 0) {
       "BridgeClip-Android-release.aab",
       "BridgeClip-Windows-release.zip",
       "RELEASE_NOTES.md",
-      "RELEASE_AUDIT.md"
+      "RELEASE_AUDIT.md",
+      "PHYSICAL_QA_CHECKLIST.md"
     )
 
     foreach ($expectedFile in $expectedManifestFiles) {
