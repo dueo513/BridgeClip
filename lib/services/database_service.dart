@@ -481,6 +481,12 @@ class DatabaseService {
     });
   }
 
+  Future<void> waitForPendingWrites() async {
+    if (Platform.isWindows) return;
+    await _ensureSignedIn();
+    await _firestore.waitForPendingWrites();
+  }
+
   Future<void> togglePin(String id, bool currentState) async {
     if (Platform.isWindows) {
       final response = await http.patch(

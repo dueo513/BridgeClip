@@ -644,6 +644,7 @@ class _ClipboardHomeState extends State<ClipboardHome>
       final text = data?.text;
       if (text != null && text.trim().isNotEmpty) {
         await _uploadLocalClipboardText(text);
+        await _db.waitForPendingWrites().timeout(const Duration(seconds: 20));
       }
       SystemNavigator.pop();
     } catch (e) {
