@@ -28,12 +28,12 @@ import 'services/localization.dart';
 import 'services/platform_service.dart';
 import 'services/theme_service.dart';
 import 'state/global_state.dart';
+import 'widgets/app_lock_dialogs.dart';
 import 'widgets/choice_sheet.dart';
 import 'widgets/clipboard_body.dart';
 import 'widgets/connect_device_sheet.dart';
 import 'widgets/device_management_body.dart';
 import 'widgets/locked_scaffold.dart';
-import 'widgets/pin_field.dart';
 import 'widgets/top_icon_button.dart';
 
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
@@ -890,287 +890,24 @@ class _ClipboardHomeState extends State<ClipboardHome>
   }
 
   void _showAppLockDialog() {
-    if (_isAppLockEnabled) {
-      _showAppLockManageDialog();
-    } else {
-      _showEnableAppLockDialog();
-    }
-  }
-
-  void _showAppLockManageDialog() {
-    showDialog<void>(
+    AppLockDialogs.show(
       context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF1E1E1E),
-        title: Text(
-          LocalizationService.get('app_lock_title'),
-          style: const TextStyle(color: Colors.white),
-        ),
-        contentPadding: const EdgeInsets.fromLTRB(8, 12, 8, 0),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.lock, color: Colors.blueAccent),
-              title: Text(
-                LocalizationService.get('lock_now'),
-                style: const TextStyle(color: Colors.white),
-              ),
-              onTap: () {
-                Navigator.pop(context);
-                _lockApp();
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.pin, color: Colors.white70),
-              title: Text(
-                LocalizationService.get('change_pin'),
-                style: const TextStyle(color: Colors.white),
-              ),
-              onTap: () {
-                Navigator.pop(context);
-                _showChangeAppLockDialog();
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.lock_open, color: Colors.redAccent),
-              title: Text(
-                LocalizationService.get('disable_app_lock'),
-                style: const TextStyle(color: Colors.white),
-              ),
-              onTap: () {
-                Navigator.pop(context);
-                _showDisableAppLockDialog();
-              },
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(
-              LocalizationService.get('close'),
-              style: const TextStyle(color: Colors.white54),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showEnableAppLockDialog() {
-    final pinController = TextEditingController();
-    final confirmController = TextEditingController();
-
-    showDialog<void>(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF1E1E1E),
-        title: Text(
-          LocalizationService.get('set_pin_title'),
-          style: const TextStyle(color: Colors.white),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            PinField(
-              controller: pinController,
-              hint: LocalizationService.get('pin_hint'),
-            ),
-            const SizedBox(height: 12),
-            PinField(
-              controller: confirmController,
-              hint: LocalizationService.get('pin_confirm_hint'),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(
-              LocalizationService.get('cancel'),
-              style: const TextStyle(color: Colors.white54),
-            ),
-          ),
-          TextButton(
-            onPressed: () async {
-              final dialogNavigator = Navigator.of(context);
-              final pin = pinController.text.trim();
-              final confirm = confirmController.text.trim();
-              if (!_isValidPin(pin) || pin != confirm) {
-                _showAppLockError('app_lock_pin_mismatch');
-                return;
-              }
-
-              await AppLockService.enable(pin);
-              if (!mounted) return;
-              setState(() {
-                _isAppLockEnabled = true;
-                _isLocked = false;
-              });
-              dialogNavigator.pop();
-              _showAppLockSnack('app_lock_enabled');
-            },
-            child: Text(
-              LocalizationService.get('ok'),
-              style: const TextStyle(color: Colors.blueAccent),
-            ),
-          ),
-        ],
-      ),
-    ).whenComplete(() {
-      pinController.dispose();
-      confirmController.dispose();
-    });
-  }
-
-  void _showChangeAppLockDialog() {
-    final currentController = TextEditingController();
-    final pinController = TextEditingController();
-    final confirmController = TextEditingController();
-
-    showDialog<void>(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF1E1E1E),
-        title: Text(
-          LocalizationService.get('change_pin'),
-          style: const TextStyle(color: Colors.white),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            PinField(
-              controller: currentController,
-              hint: LocalizationService.get('current_pin_hint'),
-            ),
-            const SizedBox(height: 12),
-            PinField(
-              controller: pinController,
-              hint: LocalizationService.get('new_pin_hint'),
-            ),
-            const SizedBox(height: 12),
-            PinField(
-              controller: confirmController,
-              hint: LocalizationService.get('pin_confirm_hint'),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(
-              LocalizationService.get('cancel'),
-              style: const TextStyle(color: Colors.white54),
-            ),
-          ),
-          TextButton(
-            onPressed: () async {
-              final dialogNavigator = Navigator.of(context);
-              final current = currentController.text.trim();
-              final pin = pinController.text.trim();
-              final confirm = confirmController.text.trim();
-              final isCurrentValid = await AppLockService.verify(current);
-              if (!isCurrentValid) {
-                _showAppLockError('app_lock_wrong_pin');
-                return;
-              }
-              if (!_isValidPin(pin) || pin != confirm) {
-                _showAppLockError('app_lock_pin_mismatch');
-                return;
-              }
-
-              await AppLockService.enable(pin);
-              if (!mounted) return;
-              dialogNavigator.pop();
-              _showAppLockSnack('pin_changed');
-            },
-            child: Text(
-              LocalizationService.get('ok'),
-              style: const TextStyle(color: Colors.blueAccent),
-            ),
-          ),
-        ],
-      ),
-    ).whenComplete(() {
-      currentController.dispose();
-      pinController.dispose();
-      confirmController.dispose();
-    });
-  }
-
-  void _showDisableAppLockDialog() {
-    final pinController = TextEditingController();
-
-    showDialog<void>(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF1E1E1E),
-        title: Text(
-          LocalizationService.get('disable_app_lock'),
-          style: const TextStyle(color: Colors.white),
-        ),
-        content: PinField(
-          controller: pinController,
-          hint: LocalizationService.get('current_pin_hint'),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(
-              LocalizationService.get('cancel'),
-              style: const TextStyle(color: Colors.white54),
-            ),
-          ),
-          TextButton(
-            onPressed: () async {
-              final dialogNavigator = Navigator.of(context);
-              final isValid = await AppLockService.verify(
-                pinController.text.trim(),
-              );
-              if (!isValid) {
-                _showAppLockError('app_lock_wrong_pin');
-                return;
-              }
-
-              await AppLockService.disable();
-              if (!mounted) return;
-              setState(() {
-                _isAppLockEnabled = false;
-                _isLocked = false;
-              });
-              dialogNavigator.pop();
-              _showAppLockSnack('app_lock_disabled');
-            },
-            style: TextButton.styleFrom(foregroundColor: Colors.redAccent),
-            child: Text(LocalizationService.get('disable_app_lock')),
-          ),
-        ],
-      ),
-    ).whenComplete(pinController.dispose);
-  }
-
-  bool _isValidPin(String pin) {
-    return RegExp(r'^\d{4,12}$').hasMatch(pin);
-  }
-
-  void _showAppLockError(String key) {
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(LocalizationService.get(key)),
-        backgroundColor: Colors.redAccent,
-      ),
-    );
-  }
-
-  void _showAppLockSnack(String key) {
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(LocalizationService.get(key)),
-        backgroundColor: Colors.blueAccent,
-      ),
+      isEnabled: _isAppLockEnabled,
+      onLockNow: _lockApp,
+      onEnabled: () {
+        if (!mounted) return;
+        setState(() {
+          _isAppLockEnabled = true;
+          _isLocked = false;
+        });
+      },
+      onDisabled: () {
+        if (!mounted) return;
+        setState(() {
+          _isAppLockEnabled = false;
+          _isLocked = false;
+        });
+      },
     );
   }
 
