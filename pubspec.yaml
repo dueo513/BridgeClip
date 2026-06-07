@@ -81,6 +81,8 @@ flutter:
     - assets/logo.png
     - assets/logo_dark.png
     - assets/logo_light.png
+    - assets/launcher_icon_dark.png
+    - assets/launcher_icon_light.png
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
 
