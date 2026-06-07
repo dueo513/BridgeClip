@@ -13,6 +13,7 @@ import '../models/clipboard_item.dart';
 import '../models/device_info.dart';
 import 'crypto_service.dart';
 import 'device_identity_service.dart';
+import 'firestore_rest_codec.dart';
 
 class DatabaseService {
   DatabaseService({required this.roomId});
@@ -126,42 +127,6 @@ class DatabaseService {
     };
   }
 
-  Map<String, dynamic> _restFields(Map<String, dynamic> values) {
-    return {
-      for (final entry in values.entries)
-        entry.key: switch (entry.value) {
-          String value => {'stringValue': value},
-          bool value => {'booleanValue': value},
-          DateTime value => {'timestampValue': value.toUtc().toIso8601String()},
-          int value => {'integerValue': value.toString()},
-          double value => {'doubleValue': value},
-          _ => {'nullValue': null},
-        },
-    };
-  }
-
-  Map<String, dynamic> _fromRestFields(Map<String, dynamic>? fields) {
-    final result = <String, dynamic>{};
-    if (fields == null) return result;
-
-    for (final entry in fields.entries) {
-      final value = entry.value as Map<String, dynamic>;
-      if (value.containsKey('stringValue')) {
-        result[entry.key] = value['stringValue'] as String;
-      } else if (value.containsKey('booleanValue')) {
-        result[entry.key] = value['booleanValue'] as bool;
-      } else if (value.containsKey('timestampValue')) {
-        result[entry.key] = DateTime.parse(value['timestampValue'] as String);
-      } else if (value.containsKey('integerValue')) {
-        result[entry.key] = int.tryParse(value['integerValue'] as String) ?? 0;
-      } else if (value.containsKey('doubleValue')) {
-        result[entry.key] = (value['doubleValue'] as num).toDouble();
-      }
-    }
-
-    return result;
-  }
-
   DateTime? _readDocumentTime(dynamic value) {
     if (value == null) return null;
     if (value is DateTime) return value.toUtc();
@@ -201,7 +166,7 @@ class DatabaseService {
       final body = jsonDecode(response.body) as Map<String, dynamic>;
       final documents = (body['documents'] as List<dynamic>?) ?? const [];
       for (final document in documents.cast<Map<String, dynamic>>()) {
-        final data = _fromRestFields(
+        final data = FirestoreRestCodec.fromFields(
           document['fields'] as Map<String, dynamic>?,
         );
         if (data['contentHash'] == contentHash &&
@@ -264,7 +229,7 @@ class DatabaseService {
       final response = await http.patch(
         _restUri('rooms/${Uri.encodeComponent(roomId)}'),
         headers: await _restHeaders(),
-        body: jsonEncode({'fields': _restFields(values)}),
+        body: jsonEncode({'fields': FirestoreRestCodec.fields(values)}),
       );
 
       if (response.statusCode < 200 || response.statusCode >= 300) {
@@ -301,7 +266,9 @@ class DatabaseService {
         }),
         headers: await _restHeaders(),
         body: jsonEncode({
-          'fields': _restFields({'lastActiveAt': DateTime.now().toUtc()}),
+          'fields': FirestoreRestCodec.fields({
+            'lastActiveAt': DateTime.now().toUtc(),
+          }),
         }),
       );
 
@@ -337,7 +304,9 @@ class DatabaseService {
     for (final document in documents.cast<Map<String, dynamic>>()) {
       final name = document['name'] as String;
       final id = name.substring(name.lastIndexOf('/') + 1);
-      final data = _fromRestFields(document['fields'] as Map<String, dynamic>?);
+      final data = FirestoreRestCodec.fromFields(
+        document['fields'] as Map<String, dynamic>?,
+      );
       final rawContent = data['content'] as String? ?? '';
       final decryptedContent = await CryptoService.instance.decrypt(rawContent);
 
@@ -367,22 +336,27 @@ class DatabaseService {
     for (final document in documents.cast<Map<String, dynamic>>()) {
       final name = document['name'] as String;
       final id = Uri.decodeComponent(name.substring(name.lastIndexOf('/') + 1));
-      final data = _fromRestFields(document['fields'] as Map<String, dynamic>?);
+      final data = FirestoreRestCodec.fromFields(
+        document['fields'] as Map<String, dynamic>?,
+      );
       devices.add(
         DeviceInfo.fromMap(id, data, currentDeviceId: currentDeviceId),
       );
     }
 
+    _sortDevices(devices);
+    return devices;
+  }
+
+  void _sortDevices(List<DeviceInfo> devices) {
+    final epoch = DateTime.fromMillisecondsSinceEpoch(0);
     devices.sort((a, b) {
       if (a.isCurrentDevice) return -1;
       if (b.isCurrentDevice) return 1;
-      final aTime =
-          a.lastSeenAt ?? a.updatedAt ?? DateTime.fromMillisecondsSinceEpoch(0);
-      final bTime =
-          b.lastSeenAt ?? b.updatedAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+      final aTime = a.lastSeenAt ?? a.updatedAt ?? epoch;
+      final bTime = b.lastSeenAt ?? b.updatedAt ?? epoch;
       return bTime.compareTo(aTime);
     });
-    return devices;
   }
 
   Future<void> registerDevice(DeviceInfo device) async {
@@ -401,7 +375,7 @@ class DatabaseService {
       final response = await http.patch(
         _restUri('users/$roomId/tokens/${Uri.encodeComponent(device.id)}'),
         headers: await _restHeaders(),
-        body: jsonEncode({'fields': _restFields(values)}),
+        body: jsonEncode({'fields': FirestoreRestCodec.fields(values)}),
       );
 
       if (response.statusCode < 200 || response.statusCode >= 300) {
@@ -446,7 +420,7 @@ class DatabaseService {
         _restUri('users/$roomId/clipboards/${Uri.encodeComponent(documentId)}'),
         headers: await _restHeaders(),
         body: jsonEncode({
-          'fields': _restFields({
+          'fields': FirestoreRestCodec.fields({
             'content': encryptedContent,
             'timestamp': now,
             'createdAtClient': now,
@@ -495,7 +469,7 @@ class DatabaseService {
         }),
         headers: await _restHeaders(),
         body: jsonEncode({
-          'fields': _restFields({'isPinned': !currentState}),
+          'fields': FirestoreRestCodec.fields({'isPinned': !currentState}),
         }),
       );
 
@@ -521,7 +495,7 @@ class DatabaseService {
         _restUri('users/$roomId/tokens/${Uri.encodeComponent(deviceId)}'),
         headers: await _restHeaders(),
         body: jsonEncode({
-          'fields': _restFields({
+          'fields': FirestoreRestCodec.fields({
             'deviceName': deviceName,
             'token': token,
             'platform': platform,
@@ -604,19 +578,7 @@ class DatabaseService {
           )
           .toList();
 
-      devices.sort((a, b) {
-        if (a.isCurrentDevice) return -1;
-        if (b.isCurrentDevice) return 1;
-        final aTime =
-            a.lastSeenAt ??
-            a.updatedAt ??
-            DateTime.fromMillisecondsSinceEpoch(0);
-        final bTime =
-            b.lastSeenAt ??
-            b.updatedAt ??
-            DateTime.fromMillisecondsSinceEpoch(0);
-        return bTime.compareTo(aTime);
-      });
+      _sortDevices(devices);
       return devices;
     });
   }
@@ -636,7 +598,7 @@ class DatabaseService {
         ),
         headers: await _restHeaders(),
         body: jsonEncode({
-          'fields': _restFields({'deviceName': trimmed}),
+          'fields': FirestoreRestCodec.fields({'deviceName': trimmed}),
         }),
       );
 
@@ -664,7 +626,9 @@ class DatabaseService {
         ),
         headers: await _restHeaders(),
         body: jsonEncode({
-          'fields': _restFields({'notificationsEnabled': enabled}),
+          'fields': FirestoreRestCodec.fields({
+            'notificationsEnabled': enabled,
+          }),
         }),
       );
 
