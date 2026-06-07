@@ -1073,7 +1073,10 @@ class _ClipboardHomeState extends State<ClipboardHome>
                               ClipRRect(
                                 borderRadius: BorderRadius.circular(12),
                                 child: Image.asset(
-                                  'assets/logo.png',
+                                  Theme.of(context).brightness ==
+                                          Brightness.dark
+                                      ? 'assets/logo_dark.png'
+                                      : 'assets/logo_light.png',
                                   width: 42,
                                   height: 42,
                                   fit: BoxFit.cover,
