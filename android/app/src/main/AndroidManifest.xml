@@ -31,12 +31,18 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="appclip" />
             </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="bridgeclip" android:host="join" />
+            </intent-filter>
         </activity>
 
         <service
             android:name=".SyncTileService"
             android:icon="@mipmap/ic_launcher"
-            android:label="PC로 연동"
+            android:label="Send to PC"
             android:permission="android.permission.BIND_QUICK_SETTINGS_TILE"
             android:exported="true">
             <intent-filter>

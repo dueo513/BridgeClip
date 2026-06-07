@@ -1,8 +1,15 @@
 #include "flutter_window.h"
 
 #include <optional>
+#include <windows.h>
 
-#include "flutter/generated_plugin_registrant.h"
+#include <app_links/app_links_plugin_c_api.h>
+#include <clipboard_watcher/clipboard_watcher_plugin.h>
+#include <flutter/standard_method_codec.h>
+#include <firebase_core/firebase_core_plugin_c_api.h>
+#include <screen_retriever_windows/screen_retriever_windows_plugin_c_api.h>
+#include <tray_manager/tray_manager_plugin.h>
+#include <window_manager/window_manager_plugin.h>
 
 FlutterWindow::FlutterWindow(const flutter::DartProject& project)
     : project_(project) {}
@@ -24,7 +31,35 @@ bool FlutterWindow::OnCreate() {
   if (!flutter_controller_->engine() || !flutter_controller_->view()) {
     return false;
   }
-  RegisterPlugins(flutter_controller_->engine());
+  // cloud_firestore/firebase_auth currently crash during Windows native plugin
+  // startup in this app; Windows uses Firestore/Auth REST calls instead.
+  AppLinksPluginCApiRegisterWithRegistrar(
+      flutter_controller_->engine()->GetRegistrarForPlugin("AppLinksPluginCApi"));
+  ClipboardWatcherPluginRegisterWithRegistrar(
+      flutter_controller_->engine()->GetRegistrarForPlugin("ClipboardWatcherPlugin"));
+  FirebaseCorePluginCApiRegisterWithRegistrar(
+      flutter_controller_->engine()->GetRegistrarForPlugin("FirebaseCorePluginCApi"));
+  ScreenRetrieverWindowsPluginCApiRegisterWithRegistrar(
+      flutter_controller_->engine()->GetRegistrarForPlugin("ScreenRetrieverWindowsPluginCApi"));
+  TrayManagerPluginRegisterWithRegistrar(
+      flutter_controller_->engine()->GetRegistrarForPlugin("TrayManagerPlugin"));
+  WindowManagerPluginRegisterWithRegistrar(
+      flutter_controller_->engine()->GetRegistrarForPlugin("WindowManagerPlugin"));
+  clipboard_guard_channel_ =
+      std::make_unique<flutter::MethodChannel<flutter::EncodableValue>>(
+          flutter_controller_->engine()->messenger(),
+          "com.antigravity/clipboard_guard",
+          &flutter::StandardMethodCodec::GetInstance());
+  clipboard_guard_channel_->SetMethodCallHandler(
+      [](const flutter::MethodCall<flutter::EncodableValue>& call,
+         std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result) {
+        if (call.method_name() == "getClipboardSequenceNumber") {
+          result->Success(flutter::EncodableValue(
+              static_cast<int64_t>(::GetClipboardSequenceNumber())));
+          return;
+        }
+        result->NotImplemented();
+      });
   SetChildContent(flutter_controller_->view()->GetNativeWindow());
 
   flutter_controller_->engine()->SetNextFrameCallback([&]() {
@@ -41,6 +76,7 @@ bool FlutterWindow::OnCreate() {
 
 void FlutterWindow::OnDestroy() {
   if (flutter_controller_) {
+    clipboard_guard_channel_ = nullptr;
     flutter_controller_ = nullptr;
   }
 

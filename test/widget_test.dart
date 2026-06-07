@@ -1,30 +1,67 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
-import 'package:flutter/material.dart';
-import 'package:flutter_test/flutter_test.dart';
-
 import 'package:clipboard_sync/main.dart';
+import 'package:clipboard_sync/services/database_service.dart';
+import 'package:clipboard_sync/services/localization.dart';
+import 'package:clipboard_sync/state/global_state.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  testWidgets('BridgeClip login screen renders', (tester) async {
+    SharedPreferences.setMockInitialValues({});
+    LocalizationService.currentLang.value = AppLang.en;
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    await tester.pumpWidget(const ClipboardSyncApp());
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
+    expect(find.text('BridgeClip'), findsOneWidget);
+    expect(find.text('Create Room'), findsOneWidget);
+    expect(find.text('Join Room'), findsOneWidget);
+    expect(find.text('Create Room and start'), findsOneWidget);
+    expect(find.text('How to use BridgeClip'), findsOneWidget);
+  });
+
+  testWidgets('BridgeClip onboarding renders before first login', (
+    tester,
+  ) async {
+    SharedPreferences.setMockInitialValues({});
+    LocalizationService.currentLang.value = AppLang.en;
+
+    await tester.pumpWidget(
+      const ClipboardSyncApp(initialShowOnboarding: true),
+    );
+
+    expect(find.text('Connect with the same Room'), findsOneWidget);
+    expect(find.text('Next'), findsOneWidget);
+  });
+
+  testWidgets('join link pre-fills login room id', (tester) async {
+    SharedPreferences.setMockInitialValues({});
+    LocalizationService.currentLang.value = AppLang.en;
+    GlobalState.pendingJoinRoomId = 'BC-LINK-TEST-ROOM';
+
+    await tester.pumpWidget(const ClipboardSyncApp());
     await tester.pump();
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    expect(find.text('Join Room'), findsWidgets);
+    expect(find.text('BC-LINK-TEST-ROOM'), findsOneWidget);
+    GlobalState.pendingJoinRoomId = null;
+  });
+
+  test('settings check localization keys resolve', () {
+    LocalizationService.currentLang.value = AppLang.en;
+
+    expect(LocalizationService.get('settings_check'), 'Settings check');
+    expect(LocalizationService.get('status_push_token'), 'Push token');
+    expect(LocalizationService.get('status_auto_start'), 'Auto-start');
+    expect(
+      LocalizationService.get('status_push_token_desktop_hint'),
+      isNot('status_push_token_desktop_hint'),
+    );
+  });
+
+  test('generated room id uses the BridgeClip invite format', () {
+    final roomId = DatabaseService.generateRoomId();
+
+    expect(DatabaseService.isGeneratedRoomId(roomId), isTrue);
+    expect(roomId.startsWith('BC-'), isTrue);
   });
 }

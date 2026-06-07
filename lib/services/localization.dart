@@ -4,16 +4,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 enum AppLang { ko, en }
 
 class LocalizationService {
-  static final ValueNotifier<AppLang> currentLang = ValueNotifier<AppLang>(AppLang.ko);
+  static final ValueNotifier<AppLang> currentLang = ValueNotifier<AppLang>(
+    AppLang.ko,
+  );
 
   static Future<void> init() async {
     final prefs = await SharedPreferences.getInstance();
     final savedLang = prefs.getString('app_lang');
-    if (savedLang == 'en') {
-      currentLang.value = AppLang.en;
-    } else {
-      currentLang.value = AppLang.ko;
-    }
+    currentLang.value = savedLang == 'en' ? AppLang.en : AppLang.ko;
   }
 
   static Future<void> setLanguage(AppLang lang) async {
@@ -23,107 +21,329 @@ class LocalizationService {
   }
 
   static String get(String key) {
-    if (currentLang.value == AppLang.ko) {
-      return _ko[key] ?? key;
-    } else {
-      return _en[key] ?? key;
-    }
+    final source = currentLang.value == AppLang.ko ? _ko : _en;
+    return source[key] ?? key;
   }
 
-  static final Map<String, String> _ko = {
-    // General
-    'lang_label': 'Language / 언어',
-    'ok': '확인',
-    'cancel': '취소',
-    'close': '닫기',
-    
-    // Login Screen
-    'login_title': '나만의 클립보드 서랍장에 연결하세요.',
-    'login_err_empty': '접속할 룸 코드와 비밀번호를 모두 입력해주세요.',
-    'login_err_key': '암호화 키 생성에 실패했습니다.',
-    'room_id_label': '룸 코드 (Room ID)',
-    'room_id_hint': '예: my_secret_room',
-    'password_label': '보안 암호 (Security Password)',
-    'password_hint': '종단간 암호화(E2EE)에 사용됩니다',
-    'btn_start_sync': '동기화 시작하기',
-    'login_info': '다른 기기에서도 같은 코드를 입력하면 연동됩니다.',
-
-    // Home Screen (Main)
-    'menu': '메뉴',
-    'clipboard': '클립보드',
-    'archive': '보관함',
-    'copied_toast': '클립보드에 복사되었습니다!',
-    'empty_list': '클립보드가 비어 있습니다.\nPC나 폰에서 내용을 복사해보세요!',
-    'empty_list_archive': '보관함이 비어 있습니다.',
-
-    // Settings / Dialogs
-    'timer_title': '자동 삭제 타이머 ⏱️',
-    'timer_keep_forever': '삭제 안함',
-    'timer_1m': '1분 뒤 자동 삭제',
-    'timer_10m': '10분 뒤 자동 삭제',
-    'timer_1h': '1시간 뒤 자동 삭제',
-    'timer_1d': '1일 뒤 자동 삭제',
-    'timer_set_msg': '타이머가 {0}(으)로 설정되었습니다.',
-    'logout_title': '연동 해제',
-    'logout_msg': '현재 서랍에서 로그아웃하시겠습니까?',
-    'btn_logout': '로그아웃',
-
-    // Tray Menu (Windows)
-    'tray_show': '설정 화면 열기',
-    'tray_ready': '시작프로그램 등록완료 (BridgeClip)',
-    'tray_exit': '완전 종료',
-  };
-
-  static final Map<String, String> _en = {
-    // General
-    'lang_label': 'Language / 언어',
-    'ok': 'OK',
-    'cancel': 'Cancel',
-    'close': 'Close',
-
-    // Login Screen
-    'login_title': 'Connect to your private clipboard vault.',
-    'login_err_empty': 'Please enter both Room ID and Password.',
-    'login_err_key': 'Failed to generate encryption key.',
-    'room_id_label': 'Room ID',
-    'room_id_hint': 'e.g. my_secret_room',
-    'password_label': 'Security Password',
-    'password_hint': 'Used for End-to-End Encryption (E2EE)',
-    'btn_start_sync': 'Start Syncing',
-    'login_info': 'Enter the same credentials on other devices to sync.',
-
-    // Home Screen (Main)
-    'menu': 'Menu',
-    'clipboard': 'Clipboard',
-    'archive': 'Archive',
-    'copied_toast': 'Copied to clipboard!',
-    'empty_list': 'Clipboard is empty.\nCopy something on your PC or Phone!',
-    'empty_list_archive': 'Archive is empty.',
-
-    // Settings / Dialogs
-    'timer_title': 'Auto-Delete Timer ⏱️',
-    'timer_keep_forever': 'Keep Forever',
-    'timer_1m': 'Delete in 1 minute',
-    'timer_10m': 'Delete in 10 minutes',
-    'timer_1h': 'Delete in 1 hour',
-    'timer_1d': 'Delete in 1 day',
-    'timer_set_msg': 'Timer is set to {0}.',
-    'logout_title': 'Disconnect',
-    'logout_msg': 'Are you sure you want to log out from this vault?',
-    'btn_logout': 'Log Out',
-
-    // Tray Menu (Windows)
-    'tray_show': 'Open Settings',
-    'tray_ready': 'Added to Auto-Start (BridgeClip)',
-    'tray_exit': 'Exit App',
-  };
-
-  // Helper for formatted strings
   static String getFormatted(String key, List<String> args) {
-    String text = get(key);
-    for (int i = 0; i < args.length; i++) {
+    var text = get(key);
+    for (var i = 0; i < args.length; i++) {
       text = text.replaceAll('{$i}', args[i]);
     }
     return text;
   }
+
+  static const Map<String, String> _ko = {
+    'create_room': '새 Room 만들기',
+    'join_room': '기존 Room 참가',
+    'create_room_desc':
+        '앱이 중복 가능성이 낮은 Room ID를 자동으로 만듭니다. 다른 기기에는 이 Room ID와 같은 비밀번호를 입력하세요.',
+    'join_room_desc':
+        '이미 만든 Room ID와 같은 비밀번호를 입력하세요. 존재하지 않는 Room에는 참가할 수 없습니다.',
+    'btn_create_room': 'Room 만들고 시작',
+    'btn_join_room': 'Room 참가',
+    'btn_regenerate_room': 'Room ID 다시 만들기',
+    'room_not_found': 'Room을 찾을 수 없습니다. Room ID를 다시 확인해 주세요.',
+    'room_create_failed': 'Room을 만들 수 없습니다. 잠시 후 다시 시도해 주세요.',
+    'room_join_failed': 'Room에 참가할 수 없습니다. 네트워크 상태와 Room ID를 확인해 주세요.',
+    'language_title': '언어',
+    'room_short_label': 'Room',
+    'items_count': '{0}개 항목',
+    'devices_count': '{0}개 기기',
+    'sync_ready': '동기화 준비됨',
+    'filters_active': '필터 적용 중',
+    'quick_actions': '빠른 상태',
+    'connect_new_device': '새 기기 연결',
+    'connect_new_device_desc':
+        '다른 기기에서 이 Room ID를 입력하거나 QR을 스캔하세요. 비밀번호는 별도로 입력해야 합니다.',
+    'connection_link': '연결 링크',
+    'copy_room_id': 'Room ID 복사',
+    'copy_connection_link': '연결 링크 복사',
+    'connection_copied': '연결 정보가 복사되었습니다.',
+    'language_ko': '한국어',
+    'language_en': 'English',
+    'ok': '확인',
+    'cancel': '취소',
+    'close': '닫기',
+    'copy': '복사',
+    'select_copy': '선택 복사',
+    'copy_selected': '선택한 내용 복사',
+    'unknown': '알 수 없음',
+
+    'login_title': '나만의 클립보드 금고에 연결하세요.',
+    'login_err_empty': 'Room ID와 보안 비밀번호를 모두 입력하세요.',
+    'login_err_key': '암호화 키를 만들 수 없습니다.',
+    'room_id_label': 'Room ID',
+    'room_id_hint': '예: my_secret_room',
+    'password_label': '보안 비밀번호',
+    'password_hint': '종단간 암호화(E2EE)에 사용됩니다',
+    'btn_start_sync': '동기화 시작',
+    'login_info': '다른 기기에서도 같은 정보를 입력하면 동기화됩니다.',
+
+    'menu': '메뉴',
+    'clipboard': '클립보드',
+    'archive': '아카이브',
+    'copied_toast': '클립보드에 복사했습니다.',
+    'copied_now_toast': '클립보드에 바로 복사했습니다.',
+    'deleted_toast': '삭제했습니다.',
+    'empty_list': '클립보드가 비어 있습니다.\nPC나 휴대폰에서 내용을 복사해 보세요.',
+    'empty_list_archive': '아카이브가 비어 있습니다.',
+    'empty_filtered_list': '조건에 맞는 클립보드가 없습니다.',
+    'search_clipboards': '클립보드 검색',
+    'filter_all_devices': '모든 기기',
+    'filter_all_time': '전체 기간',
+    'filter_today': '오늘',
+    'filter_this_week': '최근 7일',
+    'clear_filters': '필터 초기화',
+
+    'notification_title': '클립보드 동기화',
+    'notification_body': '새 클립보드 데이터가 도착했습니다.',
+    'notification_channel': '클립보드 알림',
+    'notification_enabled': '알림을 켰습니다.',
+    'notification_disabled': '알림을 껐습니다.',
+    'copy_failed': '복사에 실패했습니다.',
+    'foreground_copy_failed': '알림 복사 처리에 실패했습니다.',
+    'select_copy_title': '복사할 부분 선택',
+
+    'timer_title': '자동 삭제 시간',
+    'timer_keep_forever': '자동 삭제 안 함',
+    'timer_1m': '1분 후 자동 삭제',
+    'timer_10m': '10분 후 자동 삭제',
+    'timer_1h': '1시간 후 자동 삭제',
+    'timer_1d': '1일 후 자동 삭제',
+    'timer_set_msg': '자동 삭제 시간이 {0}(으)로 설정되었습니다.',
+    'logout_title': '연결 해제',
+    'logout_msg': '현재 클립보드 금고에서 로그아웃할까요?',
+    'btn_logout': '로그아웃',
+    'device_management': '기기 관리',
+    'connected_room': '연결된 Room: {0}',
+    'connected_devices': '연결된 기기',
+    'current_device': '현재 기기',
+    'rename_device': '기기 이름 변경',
+    'remove_device': '기기 제거',
+    'last_seen': '마지막 연결',
+    'notifications_for_this_device': '이 기기 알림',
+    'device_removed': '기기를 제거했습니다.',
+    'device_rename_title': '기기 이름 변경',
+    'device_name_hint': '예: 내 노트북',
+    'empty_devices': '연결된 기기가 없습니다.',
+    'remove_device_msg': '{0} 기기를 제거할까요?',
+    'remove_current_device_msg': '현재 기기를 제거하면 이 앱은 연결 해제됩니다.',
+    'app_lock_title': '앱 잠금',
+    'app_locked_title': 'BridgeClip 잠김',
+    'app_locked_message': '동기화는 계속 진행됩니다. 내용을 보려면 PIN을 입력하세요.',
+    'unlock': '잠금 해제',
+    'lock_now': '지금 잠그기',
+    'set_pin_title': 'PIN 설정',
+    'pin_hint': '4-12자리 PIN',
+    'pin_confirm_hint': 'PIN 다시 입력',
+    'current_pin_hint': '현재 PIN',
+    'new_pin_hint': '새 PIN',
+    'change_pin': 'PIN 변경',
+    'disable_app_lock': '앱 잠금 끄기',
+    'app_lock_enabled': '앱 잠금을 켰습니다.',
+    'app_lock_disabled': '앱 잠금을 껐습니다.',
+    'pin_changed': 'PIN을 변경했습니다.',
+    'app_lock_wrong_pin': 'PIN이 올바르지 않습니다.',
+    'app_lock_pin_mismatch': 'PIN은 4-12자리 숫자여야 하며, 두 입력이 같아야 합니다.',
+    'onboarding_help': '처음 사용하는 방법',
+    'onboarding_skip': '건너뛰기',
+    'onboarding_next': '다음',
+    'onboarding_start': 'BridgeClip 시작',
+    'onboarding_room_title': '같은 Room으로 연결',
+    'onboarding_room_body':
+        'Windows와 Android에서 같은 Room ID와 비밀번호를 입력하면 하나의 개인 클립보드 금고로 동기화됩니다.',
+    'onboarding_e2ee_title': '비밀번호로 E2EE 보호',
+    'onboarding_e2ee_body':
+        '비밀번호는 서버에 저장되지 않습니다. 클립보드 내용은 기기 안에서 암호화되고, 같은 비밀번호를 가진 기기에서만 복호화됩니다.',
+    'onboarding_realtime_title': '복사하면 바로 도착',
+    'onboarding_realtime_body':
+        'Windows는 트레이에 숨어도 계속 감시합니다. Android는 알림 권한을 켜면 새 클립을 받고 복사/선택 복사 액션을 바로 사용할 수 있습니다.',
+    'settings_check': '설정 점검',
+    'settings_check_desc': '동기화가 안 될 때 먼저 볼 현재 기기 상태입니다.',
+    'status_room': 'Room ID',
+    'status_device_id': '기기 ID',
+    'status_platform': '플랫폼',
+    'status_notifications': '알림',
+    'status_push_token': '푸시 토큰',
+    'status_app_lock': '앱 잠금',
+    'status_auto_start': '자동 시작',
+    'status_on': '켜짐',
+    'status_off': '꺼짐',
+    'status_available': '있음',
+    'status_missing': '없음',
+    'status_not_needed': '해당 없음',
+    'status_checking': '확인 중',
+    'status_notifications_hint': 'Android에서는 알림을 켜야 새 클립을 빠르게 받을 수 있습니다.',
+    'status_push_token_hint': '앱을 다시 열거나 알림 권한을 확인하면 토큰이 다시 등록됩니다.',
+    'status_push_token_desktop_hint': '데스크톱은 푸시 토큰 없이 Firestore 동기화를 사용합니다.',
+    'status_app_lock_hint': '앱 잠금은 화면만 가리고 동기화는 계속됩니다.',
+    'status_auto_start_hint': 'Windows 시작 후 자동 동기화를 원하면 자동 시작을 켜야 합니다.',
+
+    'tray_show': 'BridgeClip 열기',
+    'tray_ready': '시작 프로그램 등록됨',
+    'tray_exit': '완전히 종료',
+  };
+
+  static const Map<String, String> _en = {
+    'create_room': 'Create Room',
+    'join_room': 'Join Room',
+    'create_room_desc':
+        'BridgeClip generates a hard-to-guess Room ID. Use this Room ID and the same password on your other devices.',
+    'join_room_desc':
+        'Enter an existing Room ID and the same password. BridgeClip will not create rooms from typos.',
+    'btn_create_room': 'Create Room and start',
+    'btn_join_room': 'Join Room',
+    'btn_regenerate_room': 'Regenerate Room ID',
+    'room_not_found': 'Room not found. Check the Room ID and try again.',
+    'room_create_failed': 'Could not create the Room. Try again shortly.',
+    'room_join_failed':
+        'Could not join the Room. Check your network and Room ID.',
+    'language_title': 'Language',
+    'room_short_label': 'Room',
+    'items_count': '{0} items',
+    'devices_count': '{0} devices',
+    'sync_ready': 'Ready to sync',
+    'filters_active': 'Filters active',
+    'quick_actions': 'Quick status',
+    'connect_new_device': 'Connect new device',
+    'connect_new_device_desc':
+        'Enter this Room ID or scan the QR code on another device. The password is entered separately.',
+    'connection_link': 'Connection link',
+    'copy_room_id': 'Copy Room ID',
+    'copy_connection_link': 'Copy connection link',
+    'connection_copied': 'Connection details copied.',
+    'language_ko': '한국어',
+    'language_en': 'English',
+    'ok': 'OK',
+    'cancel': 'Cancel',
+    'close': 'Close',
+    'copy': 'Copy',
+    'select_copy': 'Select copy',
+    'copy_selected': 'Copy selection',
+    'unknown': 'Unknown',
+
+    'login_title': 'Connect to your private clipboard vault.',
+    'login_err_empty': 'Please enter both Room ID and password.',
+    'login_err_key': 'Failed to generate the encryption key.',
+    'room_id_label': 'Room ID',
+    'room_id_hint': 'e.g. my_secret_room',
+    'password_label': 'Security password',
+    'password_hint': 'Used for end-to-end encryption (E2EE)',
+    'btn_start_sync': 'Start syncing',
+    'login_info': 'Use the same credentials on other devices to sync.',
+
+    'menu': 'Menu',
+    'clipboard': 'Clipboard',
+    'archive': 'Archive',
+    'copied_toast': 'Copied to clipboard.',
+    'copied_now_toast': 'Copied directly to clipboard.',
+    'deleted_toast': 'Deleted.',
+    'empty_list': 'Clipboard is empty.\nCopy something on your PC or phone.',
+    'empty_list_archive': 'Archive is empty.',
+    'empty_filtered_list': 'No clipboard items match these filters.',
+    'search_clipboards': 'Search clipboard',
+    'filter_all_devices': 'All devices',
+    'filter_all_time': 'All time',
+    'filter_today': 'Today',
+    'filter_this_week': 'Last 7 days',
+    'clear_filters': 'Clear filters',
+
+    'notification_title': 'Clipboard sync',
+    'notification_body': 'New clipboard data arrived.',
+    'notification_channel': 'Clipboard notifications',
+    'notification_enabled': 'Notifications enabled.',
+    'notification_disabled': 'Notifications disabled.',
+    'copy_failed': 'Copy failed.',
+    'foreground_copy_failed': 'Notification copy handling failed.',
+    'select_copy_title': 'Select text to copy',
+
+    'timer_title': 'Auto-delete timer',
+    'timer_keep_forever': 'Keep forever',
+    'timer_1m': 'Delete after 1 minute',
+    'timer_10m': 'Delete after 10 minutes',
+    'timer_1h': 'Delete after 1 hour',
+    'timer_1d': 'Delete after 1 day',
+    'timer_set_msg': 'Timer is set to {0}.',
+    'logout_title': 'Disconnect',
+    'logout_msg': 'Log out from this clipboard vault?',
+    'btn_logout': 'Log out',
+    'device_management': 'Device management',
+    'connected_room': 'Connected Room: {0}',
+    'connected_devices': 'Connected devices',
+    'current_device': 'This device',
+    'rename_device': 'Rename device',
+    'remove_device': 'Remove device',
+    'last_seen': 'Last seen',
+    'notifications_for_this_device': 'Notifications for this device',
+    'device_removed': 'Device removed.',
+    'device_rename_title': 'Rename device',
+    'device_name_hint': 'e.g. My laptop',
+    'empty_devices': 'No connected devices yet.',
+    'remove_device_msg': 'Remove {0}?',
+    'remove_current_device_msg':
+        'Removing this device will disconnect this app.',
+    'app_lock_title': 'App lock',
+    'app_locked_title': 'BridgeClip is locked',
+    'app_locked_message':
+        'Sync keeps running. Enter your PIN to view clipboard content.',
+    'unlock': 'Unlock',
+    'lock_now': 'Lock now',
+    'set_pin_title': 'Set PIN',
+    'pin_hint': '4-12 digit PIN',
+    'pin_confirm_hint': 'Confirm PIN',
+    'current_pin_hint': 'Current PIN',
+    'new_pin_hint': 'New PIN',
+    'change_pin': 'Change PIN',
+    'disable_app_lock': 'Turn off app lock',
+    'app_lock_enabled': 'App lock enabled.',
+    'app_lock_disabled': 'App lock disabled.',
+    'pin_changed': 'PIN changed.',
+    'app_lock_wrong_pin': 'Incorrect PIN.',
+    'app_lock_pin_mismatch':
+        'PIN must be 4-12 digits, and both entries must match.',
+    'onboarding_help': 'How to use BridgeClip',
+    'onboarding_skip': 'Skip',
+    'onboarding_next': 'Next',
+    'onboarding_start': 'Start BridgeClip',
+    'onboarding_room_title': 'Connect with the same Room',
+    'onboarding_room_body':
+        'Use the same Room ID and password on Windows and Android to sync one private clipboard vault.',
+    'onboarding_e2ee_title': 'Protected by E2EE',
+    'onboarding_e2ee_body':
+        'Your password is not stored on the server. Clipboard content is encrypted on device and can only be decrypted by devices using the same password.',
+    'onboarding_realtime_title': 'Copy and it arrives',
+    'onboarding_realtime_body':
+        'Windows keeps watching from the tray. On Android, enable notifications to receive new clips and use copy or select-copy actions quickly.',
+    'settings_check': 'Settings check',
+    'settings_check_desc':
+        'Current device status to check first when sync does not work.',
+    'status_room': 'Room ID',
+    'status_device_id': 'Device ID',
+    'status_platform': 'Platform',
+    'status_notifications': 'Notifications',
+    'status_push_token': 'Push token',
+    'status_app_lock': 'App lock',
+    'status_auto_start': 'Auto-start',
+    'status_on': 'On',
+    'status_off': 'Off',
+    'status_available': 'Available',
+    'status_missing': 'Missing',
+    'status_not_needed': 'Not needed',
+    'status_checking': 'Checking',
+    'status_notifications_hint':
+        'On Android, enable notifications to receive new clips quickly.',
+    'status_push_token_hint':
+        'Open the app again or check notification permission to register the token.',
+    'status_push_token_desktop_hint':
+        'Desktop sync uses Firestore and does not need a push token.',
+    'status_app_lock_hint':
+        'App lock only hides the screen. Sync keeps running.',
+    'status_auto_start_hint':
+        'Enable auto-start if you want sync to resume when Windows starts.',
+
+    'tray_show': 'Open BridgeClip',
+    'tray_ready': 'Auto-start enabled',
+    'tray_exit': 'Exit completely',
+  };
 }

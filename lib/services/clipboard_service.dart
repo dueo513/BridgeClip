@@ -1,49 +1,51 @@
-import 'package:flutter/services.dart';
-import 'package:clipboard_watcher/clipboard_watcher.dart';
 import 'dart:io' show Platform;
+
+import 'package:clipboard_watcher/clipboard_watcher.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
+
 import 'database_service.dart';
 
 class ClipboardService extends ClipboardListener {
-  final DatabaseService _dbService;
-  String? _lastCopiedText;
-
   ClipboardService(this._dbService) {
-    // Start listening to the system clipboard on Desktop
     clipboardWatcher.addListener(this);
     clipboardWatcher.start();
   }
+
+  final DatabaseService _dbService;
+  String? _lastCopiedText;
 
   void dispose() {
     clipboardWatcher.removeListener(this);
     clipboardWatcher.stop();
   }
 
-  // Gets called automatically when Windows or Mac clipboard changes
   @override
   void onClipboardChanged() async {
-    ClipboardData? data = await Clipboard.getData(Clipboard.kTextPlain);
+    final data = await Clipboard.getData(Clipboard.kTextPlain);
     final text = data?.text;
 
-    if (text != null && text.isNotEmpty && text != _lastCopiedText) {
-      _lastCopiedText = text;
-      
-      // Determine what device is doing the copying
-      String platformName = 'unknown';
-      if (Platform.isWindows) platformName = 'windows';
-      if (Platform.isMacOS) platformName = 'macos';
-      if (Platform.isAndroid) platformName = 'android';
-      if (Platform.isIOS) platformName = 'ios';
-      
-      String deviceName = Platform.localHostname;
+    if (text == null || text.isEmpty || text == _lastCopiedText) return;
 
-      // Send instantly to Firebase
-      await _dbService.addClipboardItem(text, deviceName, platformName);
-      print("🚀 텍스트 복사 감지! Firebase 업로드 완료: $text");
-    }
+    _lastCopiedText = text;
+    await _dbService.addClipboardItem(
+      text,
+      Platform.localHostname,
+      _platformName(),
+    );
+    debugPrint('Clipboard uploaded from desktop listener.');
   }
 
-  // Helper to manually copy text (When user taps a card in the app)
   static Future<void> copyToLocal(String text) async {
     await Clipboard.setData(ClipboardData(text: text));
+  }
+
+  String _platformName() {
+    if (Platform.isWindows) return 'windows';
+    if (Platform.isMacOS) return 'macos';
+    if (Platform.isLinux) return 'linux';
+    if (Platform.isAndroid) return 'android';
+    if (Platform.isIOS) return 'ios';
+    return 'unknown';
   }
 }

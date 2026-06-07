@@ -5,6 +5,8 @@
 list(APPEND FLUTTER_PLUGIN_LIST
   app_links
   clipboard_watcher
+  cloud_firestore
+  firebase_auth
   firebase_core
   screen_retriever_windows
   tray_manager
