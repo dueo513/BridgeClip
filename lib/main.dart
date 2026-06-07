@@ -29,15 +29,11 @@ import 'services/platform_service.dart';
 import 'services/theme_service.dart';
 import 'state/global_state.dart';
 import 'widgets/choice_sheet.dart';
-import 'widgets/clipboard_row.dart';
+import 'widgets/clipboard_body.dart';
 import 'widgets/connect_device_sheet.dart';
 import 'widgets/device_management_body.dart';
-import 'widgets/header_action_button.dart';
 import 'widgets/locked_scaffold.dart';
-import 'widgets/overview_header.dart';
 import 'widgets/pin_field.dart';
-import 'widgets/search_and_filters.dart';
-import 'widgets/status_pill.dart';
 import 'widgets/top_icon_button.dart';
 
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
@@ -1643,133 +1639,77 @@ class _ClipboardHomeState extends State<ClipboardHome>
   }
 
   Widget _buildClipboardBody(AppLang lang) {
-    return StreamBuilder<List<ClipboardItem>>(
-      stream: _db.clipboardStream,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator(color: _primaryColor));
-        }
-        if (snapshot.hasError) {
-          return Center(
-            child: Text(
-              'Error: ${snapshot.error}',
-              style: TextStyle(color: _textColor),
-            ),
-          );
-        }
-
-        final visibleItems = _visibleItems(snapshot.data ?? []);
-        final items = _filteredItems(visibleItems);
-        final hasActiveFilters =
-            _searchQuery.isNotEmpty ||
-            _deviceFilter != 'all' ||
-            _timeFilter != 'all';
-
-        return Column(
-          children: [
-            _buildOverviewHeader(
-              icon: _isArchiveTab
-                  ? Icons.archive_rounded
-                  : Icons.content_paste_rounded,
-              title: _isArchiveTab
-                  ? LocalizationService.get('archive')
-                  : LocalizationService.get('clipboard'),
-              subtitle:
-                  '${LocalizationService.get('room_short_label')} ${_compactRoomId(widget.roomId)}',
-              pills: [
-                _buildStatusPill(
-                  Icons.layers_rounded,
-                  LocalizationService.getFormatted('items_count', [
-                    '${items.length}',
-                  ]),
-                ),
-                _buildStatusPill(
-                  _isNotificationEnabled
-                      ? Icons.notifications_active_rounded
-                      : Icons.notifications_off_rounded,
-                  _isNotificationEnabled
-                      ? LocalizationService.get('notification_enabled')
-                      : LocalizationService.get('notification_disabled'),
-                ),
-                if (hasActiveFilters)
-                  _buildStatusPill(
-                    Icons.filter_alt_rounded,
-                    LocalizationService.get('filters_active'),
-                    color: Colors.amber,
-                  ),
-              ],
-              trailing: _buildHeaderActionButton(
-                icon: Icons.qr_code_rounded,
-                label: LocalizationService.get('connect_new_device'),
-                onPressed: _showConnectDeviceSheet,
-              ),
-            ),
-            _buildSearchAndFilters(visibleItems),
-            Expanded(
-              child: items.isEmpty
-                  ? Center(
-                      child: Text(
-                        visibleItems.isEmpty
-                            ? (_isArchiveTab
-                                  ? LocalizationService.get(
-                                      'empty_list_archive',
-                                    )
-                                  : LocalizationService.get('empty_list'))
-                            : LocalizationService.get('empty_filtered_list'),
-                        textAlign: TextAlign.center,
-                        style: TextStyle(color: _mutedTextColor, fontSize: 16),
-                      ),
-                    )
-                  : ListView.builder(
-                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                      itemCount: items.length,
-                      itemBuilder: (context, index) =>
-                          _buildClipboardRow(items[index], lang),
-                    ),
-            ),
-          ],
-        );
+    return ClipboardBody(
+      roomId: widget.roomId,
+      clipboardStream: _db.clipboardStream,
+      lang: lang,
+      isArchiveTab: _isArchiveTab,
+      notificationsEnabled: _isNotificationEnabled,
+      searchController: _searchController,
+      searchQuery: _searchQuery,
+      deviceFilter: _deviceFilter,
+      timeFilter: _timeFilter,
+      primaryColor: _primaryColor,
+      surfaceColor: _surfaceColor,
+      softFillColor: _softFillColor,
+      borderColor: _borderColor,
+      textColor: _textColor,
+      mutedTextColor: _mutedTextColor,
+      visibleItemsFor: _visibleItems,
+      filteredItemsFor: _filteredItems,
+      onSearchChanged: (value) {
+        setState(() => _searchQuery = value.trim().toLowerCase());
       },
+      onClearSearch: () {
+        _searchController.clear();
+        setState(() => _searchQuery = '');
+      },
+      onShowDeviceFilter: (deviceOptions) => _showChoiceSheet<String>(
+        title: _deviceFilter == 'all'
+            ? LocalizationService.get('filter_all_devices')
+            : _deviceFilter,
+        value: _deviceFilter,
+        options: deviceOptions,
+        labelFor: (value) => value == 'all'
+            ? LocalizationService.get('filter_all_devices')
+            : value,
+        iconFor: (_) => Icons.devices,
+        onSelected: (selected) => setState(() => _deviceFilter = selected),
+      ),
+      onShowTimeFilter: () => _showChoiceSheet<String>(
+        title: switch (_timeFilter) {
+          'today' => LocalizationService.get('filter_today'),
+          'week' => LocalizationService.get('filter_this_week'),
+          _ => LocalizationService.get('filter_all_time'),
+        },
+        value: _timeFilter,
+        options: const ['all', 'today', 'week'],
+        labelFor: (value) => switch (value) {
+          'today' => LocalizationService.get('filter_today'),
+          'week' => LocalizationService.get('filter_this_week'),
+          _ => LocalizationService.get('filter_all_time'),
+        },
+        iconFor: (_) => Icons.schedule,
+        onSelected: (selected) => setState(() => _timeFilter = selected),
+      ),
+      onClearFilters: () {
+        _searchController.clear();
+        setState(() {
+          _searchQuery = '';
+          _deviceFilter = 'all';
+          _timeFilter = 'all';
+        });
+      },
+      onConnectDevice: _showConnectDeviceSheet,
+      onCopy: (item) => _copyToLocalClipboard(item.content),
+      onTogglePin: (item) => _db.togglePin(item.id, item.isPinned),
+      onDelete: _deleteItem,
     );
   }
 
   String _compactRoomId(String roomId) {
     if (roomId.length <= 18) return roomId;
     return '${roomId.substring(0, 11)}...${roomId.substring(roomId.length - 4)}';
-  }
-
-  Widget _buildOverviewHeader({
-    required IconData icon,
-    required String title,
-    required String subtitle,
-    required List<Widget> pills,
-    Widget? trailing,
-  }) {
-    return OverviewHeader(
-      icon: icon,
-      title: title,
-      subtitle: subtitle,
-      pills: pills,
-      primaryColor: _primaryColor,
-      surfaceColor: _surfaceColor,
-      borderColor: _borderColor,
-      textColor: _textColor,
-      mutedTextColor: _mutedTextColor,
-      trailing: trailing,
-    );
-  }
-
-  Widget _buildHeaderActionButton({
-    required IconData icon,
-    required String label,
-    required VoidCallback onPressed,
-  }) {
-    return HeaderActionButton(
-      icon: icon,
-      label: label,
-      onPressed: onPressed,
-      primaryColor: _primaryColor,
-    );
   }
 
   String _joinLink() {
@@ -1809,16 +1749,6 @@ class _ClipboardHomeState extends State<ClipboardHome>
     );
   }
 
-  Widget _buildStatusPill(IconData icon, String text, {Color? color}) {
-    return StatusPill(
-      icon: icon,
-      text: text,
-      primaryColor: _primaryColor,
-      textColor: _textColor,
-      color: color,
-    );
-  }
-
   Future<void> _showChoiceSheet<T>({
     required String title,
     required T value,
@@ -1849,72 +1779,6 @@ class _ClipboardHomeState extends State<ClipboardHome>
     if (selected != null) {
       await onSelected(selected);
     }
-  }
-
-  Widget _buildSearchAndFilters(List<ClipboardItem> visibleItems) {
-    final deviceOptions = <String>[
-      'all',
-      ...visibleItems.map((item) => item.deviceName).toSet().toList()..sort(),
-    ];
-    if (_deviceFilter != 'all' && !deviceOptions.contains(_deviceFilter)) {
-      deviceOptions.add(_deviceFilter);
-    }
-
-    return SearchAndFilters(
-      searchController: _searchController,
-      searchQuery: _searchQuery,
-      deviceFilter: _deviceFilter,
-      timeFilter: _timeFilter,
-      surfaceColor: _surfaceColor,
-      softFillColor: _softFillColor,
-      borderColor: _borderColor,
-      primaryColor: _primaryColor,
-      textColor: _textColor,
-      mutedTextColor: _mutedTextColor,
-      onSearchChanged: (value) {
-        setState(() => _searchQuery = value.trim().toLowerCase());
-      },
-      onClearSearch: () {
-        _searchController.clear();
-        setState(() => _searchQuery = '');
-      },
-      onShowDeviceFilter: () => _showChoiceSheet<String>(
-        title: _deviceFilter == 'all'
-            ? LocalizationService.get('filter_all_devices')
-            : _deviceFilter,
-        value: _deviceFilter,
-        options: deviceOptions,
-        labelFor: (value) => value == 'all'
-            ? LocalizationService.get('filter_all_devices')
-            : value,
-        iconFor: (_) => Icons.devices,
-        onSelected: (selected) => setState(() => _deviceFilter = selected),
-      ),
-      onShowTimeFilter: () => _showChoiceSheet<String>(
-        title: switch (_timeFilter) {
-          'today' => LocalizationService.get('filter_today'),
-          'week' => LocalizationService.get('filter_this_week'),
-          _ => LocalizationService.get('filter_all_time'),
-        },
-        value: _timeFilter,
-        options: const ['all', 'today', 'week'],
-        labelFor: (value) => switch (value) {
-          'today' => LocalizationService.get('filter_today'),
-          'week' => LocalizationService.get('filter_this_week'),
-          _ => LocalizationService.get('filter_all_time'),
-        },
-        iconFor: (_) => Icons.schedule,
-        onSelected: (selected) => setState(() => _timeFilter = selected),
-      ),
-      onClearFilters: () {
-        _searchController.clear();
-        setState(() {
-          _searchQuery = '';
-          _deviceFilter = 'all';
-          _timeFilter = 'all';
-        });
-      },
-    );
   }
 
   Widget _buildDeviceManagementBody(AppLang lang) {
@@ -2038,18 +1902,4 @@ class _ClipboardHomeState extends State<ClipboardHome>
     }).toList();
   }
 
-  Widget _buildClipboardRow(ClipboardItem item, AppLang lang) {
-    return ClipboardRow(
-      item: item,
-      lang: lang,
-      primaryColor: _primaryColor,
-      surfaceColor: _surfaceColor,
-      borderColor: _borderColor,
-      textColor: _textColor,
-      mutedTextColor: _mutedTextColor,
-      onCopy: () => _copyToLocalClipboard(item.content),
-      onTogglePin: () => _db.togglePin(item.id, item.isPinned),
-      onDelete: () => _deleteItem(item),
-    );
-  }
 }
