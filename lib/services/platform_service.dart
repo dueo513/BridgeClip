@@ -8,6 +8,8 @@ class PlatformService {
   static bool get isDesktop =>
       Platform.isWindows || Platform.isMacOS || Platform.isLinux;
 
+  static bool get supportsAutoStart => Platform.isWindows;
+
   static String windowsTrayIconPath() {
     final executableDir = File(Platform.resolvedExecutable).parent.path;
     return '$executableDir\\data\\flutter_assets\\assets\\app_icon.ico';

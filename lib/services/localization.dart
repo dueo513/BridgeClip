@@ -197,6 +197,10 @@ class LocalizationService {
     'status_app_lock_hint': '앱 잠금은 화면만 가리고 동기화는 계속 진행됩니다.',
     'status_auto_start_hint': 'Windows 시작 후 자동 동기화를 원하면 자동 시작을 켜세요.',
 
+    'send_current_clipboard': '현재 클립보드 보내기',
+    'manual_sync_hint': '복사한 내용을 이 방으로 보냅니다',
+    'manual_sync_sent': '현재 클립보드를 보냈습니다.',
+    'manual_sync_empty': '보낼 클립보드 내용이 없습니다.',
     'tray_show': 'BridgeClip 열기',
     'tray_ready': '자동 시작 상태',
     'tray_exit': '완전히 종료',
@@ -377,6 +381,10 @@ class LocalizationService {
     'status_auto_start_hint':
         'Enable auto-start if you want sync to resume when Windows starts.',
 
+    'send_current_clipboard': 'Send current clipboard',
+    'manual_sync_hint': 'Send copied text to this room',
+    'manual_sync_sent': 'Current clipboard sent.',
+    'manual_sync_empty': 'There is no clipboard text to send.',
     'tray_show': 'Open BridgeClip',
     'tray_ready': 'Auto-start status',
     'tray_exit': 'Exit completely',

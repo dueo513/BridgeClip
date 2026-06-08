@@ -31,6 +31,7 @@ class SettingsBody extends StatelessWidget {
     required this.onToggleNotifications,
     required this.onShowAutoDelete,
     required this.onShowAppLock,
+    required this.onSendCurrentClipboard,
     required this.onToggleLaunchAtStartup,
     required this.onCopyRoomId,
     required this.onRenameCurrentDevice,
@@ -57,6 +58,7 @@ class SettingsBody extends StatelessWidget {
   final FutureOr<void> Function() onToggleNotifications;
   final VoidCallback onShowAutoDelete;
   final VoidCallback onShowAppLock;
+  final FutureOr<void> Function() onSendCurrentClipboard;
   final FutureOr<void> Function(bool value) onToggleLaunchAtStartup;
   final VoidCallback onCopyRoomId;
   final VoidCallback onRenameCurrentDevice;
@@ -146,7 +148,14 @@ class SettingsBody extends StatelessWidget {
                   value: LocalizationService.get('settings_open'),
                   onTap: onConnectDevice,
                 ),
-                if (PlatformService.isDesktop)
+                if (PlatformService.isMobile)
+                  _actionTile(
+                    icon: Icons.send_to_mobile_rounded,
+                    title: LocalizationService.get('send_current_clipboard'),
+                    value: LocalizationService.get('manual_sync_hint'),
+                    onTap: onSendCurrentClipboard,
+                  ),
+                if (PlatformService.supportsAutoStart)
                   _switchTile(
                     icon: Icons.rocket_launch_rounded,
                     title: LocalizationService.get('status_auto_start'),

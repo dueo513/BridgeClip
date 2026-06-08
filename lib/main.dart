@@ -49,6 +49,8 @@ const int _clipboardNotificationId = 1001;
 @pragma('vm:entry-point')
 void notificationTapBackground(NotificationResponse response) async {
   WidgetsFlutterBinding.ensureInitialized();
+  if (!Platform.isAndroid) return;
+
   if (!Platform.isWindows) {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
@@ -106,12 +108,16 @@ Future<void> _showLocalNotification(RemoteMessage message) async {
     ],
   );
 
+  final notificationDetails = Platform.isAndroid
+      ? const NotificationDetails(android: androidDetails)
+      : const NotificationDetails(iOS: DarwinNotificationDetails());
+
   await flutterLocalNotificationsPlugin.cancel(id: _clipboardNotificationId);
   await flutterLocalNotificationsPlugin.show(
     id: _clipboardNotificationId,
     title: title,
     body: body,
-    notificationDetails: const NotificationDetails(android: androidDetails),
+    notificationDetails: notificationDetails,
     payload: text,
   );
 }
@@ -163,9 +169,17 @@ Future<void> main() async {
   }
 
   if (PlatformService.isMobile) {
-    const initializationSettings = InitializationSettings(
-      android: AndroidInitializationSettings('@mipmap/ic_launcher'),
-    );
+    final initializationSettings = Platform.isIOS
+        ? const InitializationSettings(
+            iOS: DarwinInitializationSettings(
+              requestAlertPermission: true,
+              requestBadgePermission: true,
+              requestSoundPermission: true,
+            ),
+          )
+        : const InitializationSettings(
+            android: AndroidInitializationSettings('@mipmap/ic_launcher'),
+          );
     await flutterLocalNotificationsPlugin.initialize(
       settings: initializationSettings,
       onDidReceiveNotificationResponse: _handleLocalNotification,
@@ -505,7 +519,7 @@ class _ClipboardHomeState extends State<ClipboardHome>
   }
 
   Future<void> _loadLaunchAtStartupStatus() async {
-    if (!PlatformService.isDesktop) return;
+    if (!PlatformService.supportsAutoStart) return;
 
     try {
       final isEnabled = await launchAtStartup.isEnabled();
@@ -689,6 +703,46 @@ class _ClipboardHomeState extends State<ClipboardHome>
       SystemNavigator.pop();
     } catch (e) {
       debugPrint('Quick sync failed: $e');
+    }
+  }
+
+  Future<void> _sendCurrentClipboard() async {
+    try {
+      final data = await Clipboard.getData(Clipboard.kTextPlain);
+      final text = data?.text;
+      if (text == null || text.trim().isEmpty) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(LocalizationService.get('manual_sync_empty')),
+            backgroundColor: Colors.orangeAccent,
+          ),
+        );
+        return;
+      }
+
+      await _uploadLocalClipboardText(text);
+      await _db.waitForPendingWrites().timeout(const Duration(seconds: 20));
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            LocalizationService.get('manual_sync_sent'),
+            style: const TextStyle(color: Colors.white),
+          ),
+          backgroundColor: Colors.blueAccent,
+        ),
+      );
+    } catch (e) {
+      debugPrint('Manual clipboard sync failed: $e');
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(LocalizationService.get('settings_update_failed')),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
     }
   }
 
@@ -1143,6 +1197,7 @@ class _ClipboardHomeState extends State<ClipboardHome>
       onToggleNotifications: _toggleNotification,
       onShowAutoDelete: _showTimerDialog,
       onShowAppLock: _showAppLockDialog,
+      onSendCurrentClipboard: _sendCurrentClipboard,
       onToggleLaunchAtStartup: _setLaunchAtStartup,
       onCopyRoomId: () => _copyConnectionText(widget.roomId),
       onRenameCurrentDevice: _showRenameDeviceDialog,
@@ -1152,7 +1207,7 @@ class _ClipboardHomeState extends State<ClipboardHome>
   }
 
   Future<void> _setLaunchAtStartup(bool enabled) async {
-    if (!Platform.isWindows) return;
+    if (!PlatformService.supportsAutoStart) return;
 
     try {
       launchAtStartup.setup(

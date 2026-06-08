@@ -28,11 +28,14 @@ class DesktopShellService {
         await windowManager.focus();
       });
 
-      if (Platform.isWindows) {
+      if (PlatformService.supportsAutoStart) {
         launchAtStartup.setup(
           appName: 'BridgeClip',
           appPath: Platform.resolvedExecutable,
         );
+      }
+
+      if (Platform.isWindows) {
         await trayManager.setIcon(PlatformService.windowsTrayIconPath());
       }
 

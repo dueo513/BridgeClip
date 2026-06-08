@@ -39,17 +39,35 @@ exports.onClipboardCreated = onDocumentCreated(
       if (!token || typeof token !== "string") return;
       if (tokenDoc.get("notificationsEnabled") === false) return;
 
+      const platform = tokenDoc.get("platform");
+      const title = "Clipboard synced";
+      const body = `${uploaderDevice} sent clipboard data.`;
+      const message = {
+        token,
+        data: {
+          title,
+          body,
+          action: "open_clipboard",
+          text: encryptedText,
+        },
+      };
+
+      if (platform === "ios") {
+        message.notification = { title, body };
+        message.apns = {
+          payload: {
+            aps: {
+              alert: { title, body },
+              sound: "default",
+              "content-available": 1,
+            },
+          },
+        };
+      }
+
       targets.push({
         ref: tokenDoc.ref,
-        message: {
-          token,
-          data: {
-            title: "Clipboard synced",
-            body: `${uploaderDevice} sent clipboard data.`,
-            action: "open_clipboard",
-            text: encryptedText,
-          },
-        },
+        message,
       });
     });
 
