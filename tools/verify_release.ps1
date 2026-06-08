@@ -66,6 +66,7 @@ $requiredFiles = @(
   "RELEASE_NOTES.md",
   "RELEASE_AUDIT.md",
   "PHYSICAL_QA_CHECKLIST.md",
+  "APPLE_PLATFORM_BUILD.md",
   "RELEASE_MANIFEST.json",
   "SHA256SUMS.txt"
 )
@@ -136,7 +137,8 @@ if ($failures.Count -eq 0) {
       "BridgeClip-Windows-release.zip",
       "RELEASE_NOTES.md",
       "RELEASE_AUDIT.md",
-      "PHYSICAL_QA_CHECKLIST.md"
+      "PHYSICAL_QA_CHECKLIST.md",
+      "APPLE_PLATFORM_BUILD.md"
     )
 
     foreach ($expectedFile in $expectedManifestFiles) {

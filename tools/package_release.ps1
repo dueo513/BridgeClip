@@ -154,7 +154,8 @@ $requiredFiles = @(
   "build\windows\x64\runner\Release\clipboard_sync.exe",
   "RELEASE_NOTES.md",
   "RELEASE_AUDIT.md",
-  "PHYSICAL_QA_CHECKLIST.md"
+  "PHYSICAL_QA_CHECKLIST.md",
+  "APPLE_PLATFORM_BUILD.md"
 )
 
 foreach ($file in $requiredFiles) {
@@ -183,6 +184,7 @@ Compress-Archive -Path (Join-Path $windowsStage "*") -DestinationPath $windowsZi
 Copy-Item -Force "RELEASE_NOTES.md" (Join-Path $releaseRoot "RELEASE_NOTES.md")
 Copy-Item -Force "RELEASE_AUDIT.md" (Join-Path $releaseRoot "RELEASE_AUDIT.md")
 Copy-Item -Force "PHYSICAL_QA_CHECKLIST.md" (Join-Path $releaseRoot "PHYSICAL_QA_CHECKLIST.md")
+Copy-Item -Force "APPLE_PLATFORM_BUILD.md" (Join-Path $releaseRoot "APPLE_PLATFORM_BUILD.md")
 
 Update-PackagedReleasePaths -Path (Join-Path $releaseRoot "RELEASE_NOTES.md") -ReleaseId $ReleaseId
 Update-PackagedReleasePaths -Path (Join-Path $releaseRoot "RELEASE_AUDIT.md") -ReleaseId $ReleaseId
@@ -193,7 +195,8 @@ $hashFiles = @(
   "BridgeClip-Windows-release.zip",
   "RELEASE_NOTES.md",
   "RELEASE_AUDIT.md",
-  "PHYSICAL_QA_CHECKLIST.md"
+  "PHYSICAL_QA_CHECKLIST.md",
+  "APPLE_PLATFORM_BUILD.md"
 )
 
 $manifestArtifacts = foreach ($file in $hashFiles) {
